@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MusicPlataform.Server.Data;
 
 namespace MusicPlataform.Server.Controllers
 {
@@ -7,6 +8,6 @@ namespace MusicPlataform.Server.Controllers
     [ApiController]
     public class TracksController : ControllerBase
     {
-
+        private readonly MusicContext _context;
     }
 }
