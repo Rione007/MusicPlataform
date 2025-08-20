@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using MusicPlataform.Server.Data;
 using MusicPlataform.Server.Models;
+using static MusicPlataform.Server.DTOs.GenreDtos;
 
 namespace MusicPlataform.Server.Controllers
 {
@@ -20,7 +20,10 @@ namespace MusicPlataform.Server.Controllers
         [HttpGet]
         public IActionResult GetAllGenres()
         {
-            var genres = _context.Genres.ToList();
+            var genres = _context.Genres
+                .Select(g => new GenreReadDto(g.Id, g.Name))
+                .ToList();
+
             return Ok(genres);
         }
 
@@ -29,8 +32,9 @@ namespace MusicPlataform.Server.Controllers
         public IActionResult GetGenreById(int id)
         {
             var genre = _context.Genres
-                .Include(g => g.Tracks)
-                .FirstOrDefault(g => g.Id == id);
+                .Where(g => g.Id == id)
+                .Select(g => new GenreReadDto(g.Id, g.Name))
+                .FirstOrDefault();
 
             if (genre == null)
                 return NotFound();
@@ -40,26 +44,27 @@ namespace MusicPlataform.Server.Controllers
 
         // POST: api/genres
         [HttpPost]
-        public IActionResult CreateGenre(Genre genre)
+        public IActionResult CreateGenre(GenreCreateDto dto)
         {
+            var genre = new Genre { Name = dto.Name };
             _context.Genres.Add(genre);
             _context.SaveChanges();
-            return Ok(genre);
+
+            return Ok(new GenreReadDto(genre.Id, genre.Name));
         }
 
         // PUT: api/genres/5
         [HttpPut("{id:int}")]
-        public IActionResult UpdateGenre(int id, Genre updatedGenre)
+        public IActionResult UpdateGenre(int id, GenreCreateDto dto)
         {
             var genre = _context.Genres.Find(id);
-
             if (genre == null)
                 return NotFound();
 
-            genre.Name = updatedGenre.Name;
+            genre.Name = dto.Name;
             _context.SaveChanges();
 
-            return Ok(genre);
+            return Ok(new GenreReadDto(genre.Id, genre.Name));
         }
 
         // DELETE: api/genres/5
@@ -67,7 +72,6 @@ namespace MusicPlataform.Server.Controllers
         public IActionResult DeleteGenre(int id)
         {
             var genre = _context.Genres.Find(id);
-
             if (genre == null)
                 return NotFound();
 
