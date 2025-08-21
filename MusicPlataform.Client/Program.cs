@@ -1,7 +1,16 @@
-var builder = WebApplication.CreateBuilder(args);
+﻿var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+
+builder.Services.AddHttpClient("MusicApi", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7106/api/"); // 🔹 ajusta al puerto real de tu API
+});
+
+
+
 
 var app = builder.Build();
 
@@ -22,7 +31,7 @@ app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
+    pattern: "{controller=Users}/{action=Login}/{id?}")
     .WithStaticAssets();
 
 
