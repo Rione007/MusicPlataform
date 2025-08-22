@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using MusicPlataform.Server.Data;
 using MusicPlataform.Server.Models;
+using static MusicPlataform.Server.DTOs.UserDtO;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -23,8 +24,7 @@ namespace MusicPlataform.Server.Controllers
         public IActionResult GetAllUsers()
         {
             var users = _context.Users
-                .Include(u => u.Playlists)
-                .Include(u => u.LikedTracks)
+                .Select(u => new UserReadDto(u.Username, u.Email, u.CreatedAt))
                 .ToList();
 
             return Ok(users);
@@ -35,9 +35,9 @@ namespace MusicPlataform.Server.Controllers
         public IActionResult GetUserById(int id)
         {
             var user = _context.Users
-                .Include(u => u.Playlists)
-                .Include(u => u.LikedTracks)
-                .FirstOrDefault(u => u.Id == id);
+                .Where(u => u.Id == id)
+                .Select(u => new UserReadDto(u.Username, u.Email, u.CreatedAt))
+                .FirstOrDefault();
 
             if (user == null)
                 return NotFound();
@@ -47,53 +47,57 @@ namespace MusicPlataform.Server.Controllers
 
         // POST: api/users/register
         [HttpPost("register")]
-        public IActionResult Register(User user, string password)
+        public IActionResult Register(UserCreateDto dto)
         {
-            if (_context.Users.Any(u => u.Username == user.Username))
+            if (_context.Users.Any(u => u.Username == dto.Username))
                 return BadRequest("El nombre de usuario ya existe");
 
-            user.PasswordHash = HashPassword(password);
-            user.CreatedAt = DateTime.UtcNow;
+            var user = new User
+            {
+                Username = dto.Username,
+                Email = dto.Email,
+                PasswordHash = HashPassword(dto.Password), // 👈 aquí hasheamos
+                CreatedAt = DateTime.UtcNow
+            };
 
             _context.Users.Add(user);
             _context.SaveChanges();
 
-            return Ok(user);
+            return Ok(new UserReadDto(user.Username, user.Email, user.CreatedAt));
         }
 
         // POST: api/users/login
         [HttpPost("login")]
-        public IActionResult Login(string username, string password)
+        public IActionResult Login(UserCreateDto dto)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Username == username);
+            var user = _context.Users.FirstOrDefault(u => u.Username == dto.Username);
             if (user == null)
                 return Unauthorized("Usuario no encontrado");
 
-            if (!VerifyPassword(password, user.PasswordHash))
+            // 👇 Verificamos el hash
+            if (!VerifyPassword(dto.Password, user.PasswordHash))
                 return Unauthorized("Contraseña incorrecta");
 
-            return Ok(new
-            {
-                Message = "Login exitoso",
-                UserId = user.Id,
-                Username = user.Username,
-                Email = user.Email
-            });
+            return Ok(new UserReadDto(user.Username, user.Email, user.CreatedAt));
         }
 
         // PUT: api/users/5
         [HttpPut("{id:int}")]
-        public IActionResult UpdateUser(int id, User updatedUser)
+        public IActionResult UpdateUser(int id, UserCreateDto dto)
         {
             var user = _context.Users.Find(id);
             if (user == null)
                 return NotFound();
 
-            user.Username = updatedUser.Username;
-            user.Email = updatedUser.Email;
+            user.Username = dto.Username;
+            user.Email = dto.Email;
+
+            if (!string.IsNullOrWhiteSpace(dto.Password))
+                user.PasswordHash = HashPassword(dto.Password); // 👈 rehash si se cambia
 
             _context.SaveChanges();
-            return Ok(user);
+
+            return Ok(new UserReadDto(user.Username, user.Email, user.CreatedAt));
         }
 
         // DELETE: api/users/5
@@ -107,10 +111,10 @@ namespace MusicPlataform.Server.Controllers
             _context.Users.Remove(user);
             _context.SaveChanges();
 
-            return Ok();
+            return Ok("Usuario eliminado correctamente");
         }
 
-        // Funciones de hash
+        //  Métodos privados de seguridad
         private string HashPassword(string password)
         {
             using var sha256 = SHA256.Create();

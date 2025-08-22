@@ -27,16 +27,20 @@ namespace MusicPlataform.Client.Controllers
 
             var client = _httpClientFactory.CreateClient("MusicApi");
 
-            // Construir la query string para password
-            var url = $"users/register?password={model.Password}";
+            // DTO que espera el API
+            var dto = new
+            {
+                Username = model.Username,
+                Email = model.Email,
+                Password = model.Password // en texto plano, el API lo hashea
+            };
 
-            // Mandar el objeto User (Username + Email)
             var content = new StringContent(
-                JsonSerializer.Serialize(new { model.Username, model.Email }),
+                JsonSerializer.Serialize(dto),
                 Encoding.UTF8,
                 "application/json");
 
-            var response = await client.PostAsync(url, content);
+            var response = await client.PostAsync("users/register", content);
 
             if (response.IsSuccessStatusCode)
                 return RedirectToAction("Login");
@@ -56,9 +60,20 @@ namespace MusicPlataform.Client.Controllers
 
             var client = _httpClientFactory.CreateClient("MusicApi");
 
-            // Mandar como query string username + password
-            var url = $"users/login?username={model.Username}&password={model.Password}";
-            var response = await client.PostAsync(url, null);
+            // DTO que espera el API
+            var dto = new
+            {
+                Username = model.Username,
+                Email = string.Empty, // no se usa en login
+                Password = model.Password // en texto plano, el API lo verifica
+            };
+
+            var content = new StringContent(
+                JsonSerializer.Serialize(dto),
+                Encoding.UTF8,
+                "application/json");
+
+            var response = await client.PostAsync("users/login", content);
 
             if (response.IsSuccessStatusCode)
                 return RedirectToAction("Index", "Home");
