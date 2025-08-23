@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using MusicPlataform.Server.Data;
 using MusicPlataform.Server.Models;
+using static MusicPlataform.Server.DTOs.ArtistDtos;
 
 namespace MusicPlataform.Server.Controllers
 {
@@ -21,8 +21,7 @@ namespace MusicPlataform.Server.Controllers
         public IActionResult GetAllArtists()
         {
             var artists = _context.Artists
-                .Include(a => a.Albums)
-                .Include(a => a.Tracks)
+                .Select(a => new ArtistReadDto(a.Id, a.Name, a.Bio))
                 .ToList();
 
             return Ok(artists);
@@ -33,9 +32,9 @@ namespace MusicPlataform.Server.Controllers
         public IActionResult GetArtistById(int id)
         {
             var artist = _context.Artists
-                .Include(a => a.Albums)
-                .Include(a => a.Tracks)
-                .FirstOrDefault(a => a.Id == id);
+                .Where(a => a.Id == id)
+                .Select(a => new ArtistReadDto(a.Id, a.Name, a.Bio))
+                .FirstOrDefault();
 
             if (artist == null)
                 return NotFound();
@@ -45,29 +44,34 @@ namespace MusicPlataform.Server.Controllers
 
         // POST: api/artists
         [HttpPost]
-        public IActionResult CreateArtist(Artist artist)
+        public IActionResult CreateArtist(ArtistCreateDto dto)
         {
+            var artist = new Artist
+            {
+                Name = dto.Name,
+                Bio = dto.Bio
+            };
+
             _context.Artists.Add(artist);
             _context.SaveChanges();
 
-            return Ok(artist);
+            return Ok(new ArtistReadDto(artist.Id, artist.Name, artist.Bio));
         }
 
         // PUT: api/artists/5
         [HttpPut("{id:int}")]
-        public IActionResult UpdateArtist(int id, Artist updatedArtist)
+        public IActionResult UpdateArtist(int id, ArtistCreateDto dto)
         {
             var artist = _context.Artists.Find(id);
-
             if (artist == null)
                 return NotFound();
 
-            artist.Name = updatedArtist.Name;
-            artist.Bio = updatedArtist.Bio;
+            artist.Name = dto.Name;
+            artist.Bio = dto.Bio;
 
             _context.SaveChanges();
 
-            return Ok(artist);
+            return Ok(new ArtistReadDto(artist.Id, artist.Name, artist.Bio));
         }
 
         // DELETE: api/artists/5
@@ -75,7 +79,6 @@ namespace MusicPlataform.Server.Controllers
         public IActionResult DeleteArtist(int id)
         {
             var artist = _context.Artists.Find(id);
-
             if (artist == null)
                 return NotFound();
 

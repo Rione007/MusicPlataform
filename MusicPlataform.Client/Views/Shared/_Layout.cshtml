@@ -4,44 +4,67 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - MusicPlataform.Client</title>
-    <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/LayouteEst.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/MusicPlataform.Client.styles.css" asp-append-version="true" />
 </head>
 <body>
+    <!-- NAVBAR -->
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MusicPlataform.Client</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">MusicPlataform</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+    <!-- MAIN APP CONTAINER -->
+    <div class="app-container">
+        <!-- SIDEBAR IZQUIERDA -->
+        <aside class="sidebar">
+            <h5>Tu biblioteca</h5>
+            <ul class="list-unstyled">
+                <li><a class="text-white" href="#">Mi lista n.º 1</a></li>
+                <li><a class="text-white" href="#">Mi lista n.º 2</a></li>
+                <!-- Puedes agregar enlaces reales con asp-controller y asp-action -->
+            </ul>
+        </aside>
+
+        <!-- CONTENIDO CENTRAL -->
+        <main class="main-content">
             @RenderBody()
         </main>
+
+        <!-- PANEL DERECHO (Opcional, puedes usar RenderSection si deseas que cambie) -->
+        <aside class="right-panel d-none d-md-block">
+            <h5>Detalles</h5>
+            <p>Aquí puede ir información de la canción, artista, etc.</p>
+            @RenderSection("RightPanel", required: false)
+        </aside>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <!-- FOOTER -->
+    <footer class="border-top footer text-muted text-center py-2">
         <div class="container">
-            &copy; 2025 - MusicPlataform.Client - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - MusicPlataform.Client - <a asp-controller="Tracks" asp-action="Index">Privacy</a>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

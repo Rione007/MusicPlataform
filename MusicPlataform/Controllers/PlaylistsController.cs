@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using MusicPlataform.Server.Data;
 using MusicPlataform.Server.Models;
+using static MusicPlataform.Server.DTOs.PlaylistDtos;
 
 namespace MusicPlataform.Server.Controllers
 {
@@ -22,6 +23,13 @@ namespace MusicPlataform.Server.Controllers
         {
             var playlists = _context.Playlists
                 .Include(p => p.Tracks)
+                .Select(p => new PlaylistReadDto(
+                    p.Id,
+                    p.Name,
+                    p.OwnerId,
+                    p.IsPublic,
+                    p.Tracks.Select(pt => pt.TrackId)
+                ))
                 .ToList();
 
             return Ok(playlists);
@@ -33,7 +41,15 @@ namespace MusicPlataform.Server.Controllers
         {
             var playlist = _context.Playlists
                 .Include(p => p.Tracks)
-                .FirstOrDefault(p => p.Id == id);
+                .Where(p => p.Id == id)
+                .Select(p => new PlaylistReadDto(
+                    p.Id,
+                    p.Name,
+                    p.OwnerId,
+                    p.IsPublic,
+                    p.Tracks.Select(pt => pt.TrackId)
+                ))
+                .FirstOrDefault();
 
             if (playlist == null)
                 return NotFound();
@@ -43,30 +59,52 @@ namespace MusicPlataform.Server.Controllers
 
         // POST: api/playlists
         [HttpPost]
-        public IActionResult CreatePlaylist(Playlist playlist)
+        public IActionResult CreatePlaylist(PlaylistCreateDto dto)
         {
+            var playlist = new Playlist
+            {
+                Name = dto.Name,
+                OwnerId = dto.OwnerId,
+                IsPublic = dto.IsPublic
+            };
+
             _context.Playlists.Add(playlist);
             _context.SaveChanges();
 
-            return Ok(playlist);
+            return Ok(new PlaylistReadDto(
+                playlist.Id,
+                playlist.Name,
+                playlist.OwnerId,
+                playlist.IsPublic,
+                Enumerable.Empty<int>()
+            ));
         }
 
         // PUT: api/playlists/5
         [HttpPut("{id:int}")]
-        public IActionResult UpdatePlaylist(int id, Playlist updatedPlaylist)
+        public IActionResult UpdatePlaylist(int id, PlaylistCreateDto dto)
         {
             var playlist = _context.Playlists.Find(id);
-
             if (playlist == null)
                 return NotFound();
 
-            playlist.Name = updatedPlaylist.Name;
-            playlist.OwnerId = updatedPlaylist.OwnerId;
-            playlist.IsPublic = updatedPlaylist.IsPublic;
+            playlist.Name = dto.Name;
+            playlist.OwnerId = dto.OwnerId;
+            playlist.IsPublic = dto.IsPublic;
 
             _context.SaveChanges();
 
-            return Ok(playlist);
+            var trackIds = _context.PlaylistTracks
+                .Where(pt => pt.PlaylistId == id)
+                .Select(pt => pt.TrackId);
+
+            return Ok(new PlaylistReadDto(
+                playlist.Id,
+                playlist.Name,
+                playlist.OwnerId,
+                playlist.IsPublic,
+                trackIds
+            ));
         }
 
         // DELETE: api/playlists/5
@@ -74,7 +112,6 @@ namespace MusicPlataform.Server.Controllers
         public IActionResult DeletePlaylist(int id)
         {
             var playlist = _context.Playlists.Find(id);
-
             if (playlist == null)
                 return NotFound();
 
@@ -84,53 +121,45 @@ namespace MusicPlataform.Server.Controllers
             return Ok();
         }
 
-        // POST: api/playlists/{playlistId}/tracks
+        // ✅ POST: api/playlists/{playlistId}/tracks
         [HttpPost("{playlistId:int}/tracks")]
-        public IActionResult AddTrackToPlaylist(int playlistId, int trackId,int? order)
+        public IActionResult AddTrackToPlaylist(int playlistId, PlaylistAddTrackDto dto)
         {
             var playlist = _context.Playlists
                 .Include(p => p.Tracks)
                 .FirstOrDefault(p => p.Id == playlistId);
 
-            var track = _context.Tracks.Find(trackId);
-
-            if (playlist == null || track == null)
-                return NotFound();
+            if (playlist == null)
+                return NotFound(new { Message = "Playlist no encontrada" });
 
             var playlistTrack = new PlaylistTrack
             {
                 PlaylistId = playlistId,
-                TrackId = trackId,
-                Order = order ?? (playlist.Tracks.Count + 1),
+                TrackId = dto.TrackId,
+                Order = dto.Order ?? (playlist.Tracks.Count + 1),
                 AddedAt = DateTime.UtcNow
             };
-            playlist.Tracks.Add(playlistTrack);
+
+            _context.PlaylistTracks.Add(playlistTrack);
             _context.SaveChanges();
 
-            return Ok(playlist);
+            return Ok(new { Message = "Track agregado con éxito", playlistId, dto.TrackId, playlistTrack.Order });
         }
 
-        // DELETE: api/playlists/{playlistId}/tracks/{trackId}
+        // ✅ DELETE: api/playlists/{playlistId}/tracks/{trackId}
         [HttpDelete("{playlistId:int}/tracks/{trackId:int}")]
         public IActionResult RemoveTrackFromPlaylist(int playlistId, int trackId)
         {
-            
             var playlistTrack = _context.PlaylistTracks
                 .FirstOrDefault(pt => pt.PlaylistId == playlistId && pt.TrackId == trackId);
 
             if (playlistTrack == null)
-                return NotFound();
+                return NotFound(new { Message = "Track no encontrado en la playlist" });
 
             _context.PlaylistTracks.Remove(playlistTrack);
             _context.SaveChanges();
 
-            
-            var playlist = _context.Playlists
-                .Include(p => p.Tracks)
-                .FirstOrDefault(p => p.Id == playlistId);
-
-            return Ok(playlist);
+            return Ok(new { Message = "Track eliminado con éxito", playlistId, trackId });
         }
-
     }
 }

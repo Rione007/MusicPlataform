@@ -2,7 +2,7 @@
 
 namespace MusicPlataform.Client.Controllers
 {
-    public class ArtistsController1 : Controller
+    public class ArtistsController : Controller
     {
         public IActionResult Index()
         {

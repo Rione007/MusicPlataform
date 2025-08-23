@@ -12,8 +12,8 @@ using MusicPlataform.Server.Data;
 namespace MusicPlataform.Server.Migrations
 {
     [DbContext(typeof(MusicContext))]
-    [Migration("20250819022929_Music")]
-    partial class Music
+    [Migration("20250823030645_NuevaMusic")]
+    partial class NuevaMusic
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
