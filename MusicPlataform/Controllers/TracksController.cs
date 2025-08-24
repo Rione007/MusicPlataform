@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using MusicPlataform.Server.Data;
 using MusicPlataform.Server.Models;
+using static MusicPlataform.Server.DTOs.TrackDtos;
 
 namespace MusicPlataform.Server.Controllers
 {
@@ -24,7 +25,17 @@ namespace MusicPlataform.Server.Controllers
                 .Include(t => t.Artist)
                 .Include(t => t.Album)
                 .Include(t => t.Genre)
+                .Select(t => new TrackReadDto(
+                    t.Id,
+                    t.Title,
+                    t.DurationSeconds,
+                    t.Artist != null ? t.Artist.Name : "Unknown Artist",
+                    t.Album != null ? t.Album.Title : "Unknown Album",
+                    t.Genre != null ? t.Genre.Name : null,
+                    t.AudioUrl
+                ))
                 .ToList();
+
             return Ok(tracks);
         }
 
@@ -36,7 +47,17 @@ namespace MusicPlataform.Server.Controllers
                 .Include(t => t.Artist)
                 .Include(t => t.Album)
                 .Include(t => t.Genre)
-                .FirstOrDefault(t => t.Id == id);
+                .Where(t => t.Id == id)
+                .Select(t => new TrackReadDto(
+                    t.Id,
+                    t.Title,
+                    t.DurationSeconds,
+                    t.Artist != null ? t.Artist.Name : "Unknown Artist",
+                    t.Album != null ? t.Album.Title : "Unknown Album",
+                    t.Genre != null ? t.Genre.Name : null,
+                    t.AudioUrl
+                ))
+                .FirstOrDefault();
 
             if (track == null)
                 return NotFound();
@@ -46,32 +67,75 @@ namespace MusicPlataform.Server.Controllers
 
         // POST: api/tracks
         [HttpPost]
-        public IActionResult CreateTrack(Track track)
+        public IActionResult CreateTrack(TrackCreateDto dto)
         {
+            var track = new Track
+            {
+                Title = dto.Title,
+                DurationSeconds = dto.DurationSeconds,
+                ArtistId = dto.ArtistId,
+                AlbumId = dto.AlbumId,
+                GenreId = dto.GenreId,
+                AudioUrl = dto.AudioUrl
+            };
+
             _context.Tracks.Add(track);
             _context.SaveChanges();
-            return Ok(track);
+
+            // Devolver el objeto creado en formato DTO
+            var trackRead = _context.Tracks
+                .Include(t => t.Artist)
+                .Include(t => t.Album)
+                .Include(t => t.Genre)
+                .Where(t => t.Id == track.Id)
+                .Select(t => new TrackReadDto(
+                    t.Id,
+                    t.Title,
+                    t.DurationSeconds,
+                    t.Artist != null ? t.Artist.Name : "Unknown Artist",
+                    t.Album != null ? t.Album.Title : "Unknown Album",
+                    t.Genre != null ? t.Genre.Name : null,
+                    t.AudioUrl
+                ))
+                .FirstOrDefault();
+
+            return Ok(trackRead);
         }
 
         // PUT: api/tracks/5
         [HttpPut("{id:int}")]
-        public IActionResult UpdateTrack(int id, Track updatedTrack)
+        public IActionResult UpdateTrack(int id, TrackCreateDto dto)
         {
             var track = _context.Tracks.Find(id);
-
             if (track == null)
                 return NotFound();
 
-            track.Title = updatedTrack.Title;
-            track.DurationSeconds = updatedTrack.DurationSeconds;
-            track.ArtistId = updatedTrack.ArtistId;
-            track.AlbumId = updatedTrack.AlbumId;
-            track.GenreId = updatedTrack.GenreId;
-            track.AudioUrl = updatedTrack.AudioUrl;
+            track.Title = dto.Title;
+            track.DurationSeconds = dto.DurationSeconds;
+            track.ArtistId = dto.ArtistId;
+            track.AlbumId = dto.AlbumId;
+            track.GenreId = dto.GenreId;
+            track.AudioUrl = dto.AudioUrl;
 
             _context.SaveChanges();
 
-            return Ok(track);
+            var updatedTrack = _context.Tracks
+                .Include(t => t.Artist)
+                .Include(t => t.Album)
+                .Include(t => t.Genre)
+                .Where(t => t.Id == track.Id)
+                .Select(t => new TrackReadDto(
+                    t.Id,
+                    t.Title,
+                    t.DurationSeconds,
+                    t.Artist != null ? t.Artist.Name : "Unknown Artist",
+                    t.Album != null ? t.Album.Title : "Unknown Album",
+                    t.Genre != null ? t.Genre.Name : null,
+                    t.AudioUrl
+                ))
+                .FirstOrDefault();
+
+            return Ok(updatedTrack);
         }
 
         // DELETE: api/tracks/5
@@ -79,7 +143,6 @@ namespace MusicPlataform.Server.Controllers
         public IActionResult DeleteTrack(int id)
         {
             var track = _context.Tracks.Find(id);
-
             if (track == null)
                 return NotFound();
 

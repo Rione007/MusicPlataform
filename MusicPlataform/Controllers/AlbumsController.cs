@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using MusicPlataform.Server.Data;
 using MusicPlataform.Server.Models;
+using static MusicPlataform.Server.DTOs.AlbumDtos;
 
 namespace MusicPlataform.Server.Controllers
 {
@@ -21,8 +21,7 @@ namespace MusicPlataform.Server.Controllers
         public IActionResult GetAllAlbums()
         {
             var albums = _context.Albums
-                .Include(a => a.Artist)
-                .Include(a => a.Tracks)
+                .Select(a => new AlbumReadDto(a.Id, a.Title, a.Year, a.ArtistId, a.CoverUrl))
                 .ToList();
 
             return Ok(albums);
@@ -33,9 +32,9 @@ namespace MusicPlataform.Server.Controllers
         public IActionResult GetAlbumById(int id)
         {
             var album = _context.Albums
-                .Include(a => a.Artist)
-                .Include(a => a.Tracks)
-                .FirstOrDefault(a => a.Id == id);
+                .Where(a => a.Id == id)
+                .Select(a => new AlbumReadDto(a.Id, a.Title, a.Year, a.ArtistId, a.CoverUrl))
+                .FirstOrDefault();
 
             if (album == null)
                 return NotFound();
@@ -45,31 +44,38 @@ namespace MusicPlataform.Server.Controllers
 
         // POST: api/albums
         [HttpPost]
-        public IActionResult CreateAlbum(Album album)
+        public IActionResult CreateAlbum(AlbumCreateDto dto)
         {
+            var album = new Album
+            {
+                Title = dto.Title,
+                Year = dto.Year,
+                ArtistId = dto.ArtistId,
+                CoverUrl = dto.CoverUrl
+            };
+
             _context.Albums.Add(album);
             _context.SaveChanges();
 
-            return Ok(album);
+            return Ok(new AlbumReadDto(album.Id, album.Title, album.Year, album.ArtistId, album.CoverUrl));
         }
 
         // PUT: api/albums/5
         [HttpPut("{id:int}")]
-        public IActionResult UpdateAlbum(int id, Album updatedAlbum)
+        public IActionResult UpdateAlbum(int id, AlbumCreateDto dto)
         {
             var album = _context.Albums.Find(id);
-
             if (album == null)
                 return NotFound();
 
-            album.Title = updatedAlbum.Title;
-            album.Year = updatedAlbum.Year;
-            album.ArtistId = updatedAlbum.ArtistId;
-            album.CoverUrl = updatedAlbum.CoverUrl;
+            album.Title = dto.Title;
+            album.Year = dto.Year;
+            album.ArtistId = dto.ArtistId;
+            album.CoverUrl = dto.CoverUrl;
 
             _context.SaveChanges();
 
-            return Ok(album);
+            return Ok(new AlbumReadDto(album.Id, album.Title, album.Year, album.ArtistId, album.CoverUrl));
         }
 
         // DELETE: api/albums/5
@@ -77,7 +83,6 @@ namespace MusicPlataform.Server.Controllers
         public IActionResult DeleteAlbum(int id)
         {
             var album = _context.Albums.Find(id);
-
             if (album == null)
                 return NotFound();
 
