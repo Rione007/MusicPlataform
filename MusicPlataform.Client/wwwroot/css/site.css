@@ -48,9 +48,9 @@ body {
     font-size: 14px;
 }
 
-    .nav-right a:hover {
-        color: white;
-    }
+.nav-right a:hover {
+    color: white;
+}
 
 .register {
     margin-left: 20px;
@@ -118,11 +118,37 @@ body {
     width: 150px;
     cursor: pointer;
     text-align: center;
+    position: relative;
+    display: inline-block;
+}
+
+.play-button {
+    position: absolute;
+    top: 50%;
+    left: 85%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    color: white;
+    background-color: midnightblue;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    user-select: none;
+}
+
+.album:hover .play-button {
+    opacity: 1;
 }
 
 .album img {
-     width: 100%;
-     border-radius: 8px;
+    width: 100%;
+    display: block;
+    border-radius: 8px;
 }
 
 .album span {
@@ -157,7 +183,7 @@ body {
 .left-panel {
     flex: 1;
     background: black;
-    color: #1DB954;
+    color: midnightblue;
     padding: 60px;
     display: flex;
     flex-direction: column;
@@ -207,12 +233,12 @@ body {
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    background: #1DB954;
+    background: midnightblue;
     color: white;
 }
 
 .btn-login:hover {
-    background: #18a34a;
+    background: midnightblue;
 }
 
 .form-actions {
@@ -229,10 +255,61 @@ body {
 }
 
 .small-text a {
-    color: #1DB954;
+    color: midnightblue;
     text-decoration: none;
 }
 
 .small-text a:hover {
     text-decoration: underline;
+}
+
+/* Footer */
+
+footer#audio-footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: #121212;
+    color: white;
+    padding: 10px 20px;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+}
+
+.footer-content {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer-info {
+    display: flex;
+    align-items: center;
+}
+
+    .footer-info img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        margin-right: 10px;
+        border-radius: 4px;
+    }
+
+.footer-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-right: 100px;
+}
+
+#footer-play {
+    font-size: 20px;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
 }

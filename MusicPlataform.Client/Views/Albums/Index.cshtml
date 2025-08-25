@@ -1,0 +1,29 @@
+﻿@model IEnumerable<MusicPlataform.Client.Models.AlbumClient>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Inicio</h1>
+<div class="sidebar">
+    <h2>Tu biblioteca</h2>
+    <a href="#">Mi lista nº 1</a>
+    <a href="#">Mi lista nº 2</a>
+</div>
+
+<div class="main">
+    <h2 class="section-title">Álbumes destacados</h2>
+    <div class="albums" id="albums-container">
+        @foreach (var album in Model)
+        {
+            <div class="album" onclick="showDetails('@album.Title', '@(album.CoverUrl?.Replace("\\", "/").Trim() ?? "/img/default.jpg")', '@album.Year', '@album.ArtistId')">
+                <img src="@(album.CoverUrl?.Replace("\\", "/") ?? "/img/default.jpg")" alt="@album.Title" />
+                <span class="title">@album.Title</span>
+                <span class="year">(@album.Year)</span>
+                <div class="play-button">&#9658;</div>
+            </div>
+        }
+    </div>
+</div>
+
+

@@ -19,9 +19,11 @@
     <style>
         html, body {
             margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: Segoe UI, sans-serif;
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .register-page {
@@ -31,18 +33,18 @@
 
         .left-panel {
             flex: 1;
-            background: linear-gradient(135deg, #FF4E50, #F9D423);
-            color: white;
+            background: black;
+            color: midnightblue;
             padding: 60px;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
-            .left-panel h1 {
-                font-size: 36px;
-                font-weight: bold;
-            }
+        .left-panel h1 {
+            font-size: 36px;
+            font-weight: bold;
+        }
 
         .right-panel {
             flex: 1;
@@ -55,11 +57,17 @@
 
         .register-box {
             width: 100%;
-            max-width: 400px;
+            max-width: 360px;
         }
 
+        .register-box h2 {
+                text-align: center;
+                margin-bottom: 30px;
+                font-size: 24px;
+                font-weight: bold;
+		}
+
         .form-control {
-            background-color: #f0f0f5;
             border: none;
             border-radius: 30px;
             padding-left: 40px;
@@ -69,27 +77,29 @@
             position: relative;
         }
 
-            .form-group i {
-                position: absolute;
-                left: 15px;
-                top: 50%;
-                transform: translateY(-50%);
-                color: #999;
-            }
-
-        .btn-gradient {
-            background: linear-gradient(to right, #FF512F, #DD2476);
-            border: none;
-            border-radius: 30px;
-            color: white;
-            font-weight: bold;
-            width: 100%;
-            padding: 10px;
+        .form-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
         }
 
-            .btn-gradient:hover {
-                background: linear-gradient(to right, #DD2476, #FF512F);
-            }
+        .btn-gradient {
+            width: 100%;
+            padding: 14px;
+            border-radius: 25px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background: midnightblue;
+            color: white;
+        }
+
+        .btn-gradient:hover {
+            background: midnightblue;
+        }
 
         .text-small {
             font-size: 13px;
@@ -97,13 +107,13 @@
         }
 
         .text-center a {
-            color: #FF512F;
+            color: midnightblue;
             text-decoration: none;
         }
 
-            .text-center a:hover {
-                text-decoration: underline;
-            }
+        .text-center a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -118,7 +128,7 @@
         <!-- Right Panel -->
         <div class="right-panel">
             <div class="register-box">
-                <h5 class="text-center mb-4 text-uppercase text-primary">Registro</h5>
+                <h2 style="color: black;">Registro</h2>
 
                 <form asp-action="Register" method="post">
                     <div class="mb-3 form-group">

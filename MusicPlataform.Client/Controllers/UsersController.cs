@@ -104,7 +104,7 @@ namespace MusicPlataform.Client.Controllers
                     }
                 );
 
-                return RedirectToAction("Main", "Home");
+                return RedirectToAction("Index", "Albums");
             }
             ModelState.AddModelError("", "Usuario o contraseña incorrectos");
             return View(model);
@@ -113,7 +113,7 @@ namespace MusicPlataform.Client.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Albums");
         }
 
     }
