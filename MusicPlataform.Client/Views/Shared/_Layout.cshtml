@@ -1,80 +1,4 @@
-﻿@* <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - MusicPlataform.Client</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/LayouteEst.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/MusicPlataform.Client.styles.css" asp-append-version="true" />
-</head>
-<body>
-    <!-- NAVBAR -->
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index">MusicPlataform</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-
-    <!-- MAIN APP CONTAINER -->
-    <div class="app-container">
-        <!-- SIDEBAR IZQUIERDA -->
-        <aside class="sidebar">
-            <h5>Tu biblioteca</h5>
-            <ul class="list-unstyled">
-                <li><a class="text-white" href="#">Mi lista n.º 1</a></li>
-                <li><a class="text-white" href="#">Mi lista n.º 2</a></li>
-                <!-- Puedes agregar enlaces reales con asp-controller y asp-action -->
-            </ul>
-        </aside>
-
-        <!-- CONTENIDO CENTRAL -->
-        <main class="main-content">
-            @RenderBody()
-        </main>
-
-        <!-- PANEL DERECHO (Opcional, puedes usar RenderSection si deseas que cambie) -->
-        <aside class="right-panel d-none d-md-block">
-            <h5>Detalles</h5>
-            <p>Aquí puede ir información de la canción, artista, etc.</p>
-            @RenderSection("RightPanel", required: false)
-        </aside>
-    </div>
-
-    <!-- FOOTER -->
-    <footer class="border-top footer text-muted text-center py-2">
-        <div class="container">
-            &copy; 2025 - MusicPlataform.Client - <a asp-controller="Tracks" asp-action="Index">Privacy</a>
-        </div>
-    </footer>
-
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
-</html> *@
-
-
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
@@ -110,12 +34,32 @@
             @RenderBody()
         </div>
 
-        <div class="details" id="details">
+        @* <div class="details" id="details">
             <h3>Detalles</h3>
             <p>Aquí aparecerá información de la canción seleccionada.</p>
-        </div>
+        </div> *@
     </div>
 
-    <script src="~/js/site.js"></script>
+    <footer id="audio-footer" style="display: none;">
+        <div class="footer-content">
+            <div class="footer-info">
+                <img id="footer-img" src="" alt="" />
+                <div>
+                    <div id="footer-title">Título</div>
+                    <div id="footer-artist">Artista</div>
+                </div>
+            </div>
+
+            <div class="footer-controls">
+                <button id="footer-play">&#10073;&#10073;</button>
+                <span id="current-time">0:00</span>
+                <input type="range" id="progress-bar" value="0" min="0" max="100" step="0.1">
+                <span id="total-duration">0:00</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/site.js"></script>
+    @RenderSection("Scripts", required: false)
 </body>
 </html>
