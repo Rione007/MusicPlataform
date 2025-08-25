@@ -97,7 +97,7 @@ body {
     overflow-y: auto;
 }
 
-.inicio {
+.inicio { /* segundo index */  
     flex: 1;
     padding: 20px;
     overflow-y: auto;
@@ -146,6 +146,8 @@ body {
     border-radius: 8px;
     margin-bottom: 10px;
 }
+
+/* Login */  
 
 .login-page {
     display: flex;
@@ -209,9 +211,9 @@ body {
     color: white;
 }
 
-    .btn-login:hover {
-        background: #18a34a;
-    }
+.btn-login:hover {
+    background: #18a34a;
+}
 
 .form-actions {
     display: flex;
