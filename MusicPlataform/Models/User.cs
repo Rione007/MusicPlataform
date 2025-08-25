@@ -12,7 +12,6 @@ namespace MusicPlataform.Server.Models
             public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
             public ICollection<Playlist> Playlists { get; set; } = new List<Playlist>();
-            public ICollection<TrackLike> LikedTracks { get; set; } = new List<TrackLike>();
         }
 }
 

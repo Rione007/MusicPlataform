@@ -9,11 +9,9 @@ namespace MusicPlataform.Server.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<Artist> Artists { get; set; }
-        public DbSet<Album> Albums { get; set; }
         public DbSet<Track> Tracks { get; set; }
         public DbSet<Playlist> Playlists { get; set; }
         public DbSet<PlaylistTrack> PlaylistTracks { get; set; }
-        public DbSet<TrackLike> TrackLikes { get; set; }
         public DbSet<Genre> Genres { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -36,28 +34,6 @@ namespace MusicPlataform.Server.Data
                 .HasForeignKey(pt => pt.TrackId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ====================== TrackLike ========================
-            modelBuilder.Entity<TrackLike>()
-                .HasKey(tl => new { tl.UserId, tl.TrackId });
-
-            modelBuilder.Entity<TrackLike>()
-                .HasOne(tl => tl.User)
-                .WithMany(u => u.LikedTracks)
-                .HasForeignKey(tl => tl.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<TrackLike>()
-                .HasOne(tl => tl.Track)
-                .WithMany(t => t.Likes)
-                .HasForeignKey(tl => tl.TrackId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // ====================== Artist -> Album ==================
-            modelBuilder.Entity<Album>()
-                .HasOne(a => a.Artist)
-                .WithMany(ar => ar.Albums)
-                .HasForeignKey(a => a.ArtistId)
-                .OnDelete(DeleteBehavior.Cascade);
 
             // ====================== Artist -> Track ==================
             modelBuilder.Entity<Track>()
@@ -66,12 +42,6 @@ namespace MusicPlataform.Server.Data
                 .HasForeignKey(t => t.ArtistId)
                 .OnDelete(DeleteBehavior.Restrict); // 🔹 Bloquea cascada
 
-            // ====================== Album -> Track ===================
-            modelBuilder.Entity<Track>()
-                .HasOne(t => t.Album)
-                .WithMany(al => al.Tracks)
-                .HasForeignKey(t => t.AlbumId)
-                .OnDelete(DeleteBehavior.Cascade);
 
             // ====================== Track -> Genre ===================
             modelBuilder.Entity<Track>()

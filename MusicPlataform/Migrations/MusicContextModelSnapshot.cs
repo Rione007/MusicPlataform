@@ -22,34 +22,6 @@ namespace MusicPlataform.Server.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("MusicPlataform.Server.Models.Album", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ArtistId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CoverUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ArtistId");
-
-                    b.ToTable("Albums");
-                });
-
             modelBuilder.Entity("MusicPlataform.Server.Models.Artist", b =>
                 {
                     b.Property<int>("Id")
@@ -141,9 +113,6 @@ namespace MusicPlataform.Server.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AlbumId")
-                        .HasColumnType("int");
-
                     b.Property<int>("ArtistId")
                         .HasColumnType("int");
 
@@ -162,31 +131,11 @@ namespace MusicPlataform.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AlbumId");
-
                     b.HasIndex("ArtistId");
 
                     b.HasIndex("GenreId");
 
                     b.ToTable("Tracks");
-                });
-
-            modelBuilder.Entity("MusicPlataform.Server.Models.TrackLike", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TrackId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("LikedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("UserId", "TrackId");
-
-                    b.HasIndex("TrackId");
-
-                    b.ToTable("TrackLikes");
                 });
 
             modelBuilder.Entity("MusicPlataform.Server.Models.User", b =>
@@ -215,17 +164,6 @@ namespace MusicPlataform.Server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("MusicPlataform.Server.Models.Album", b =>
-                {
-                    b.HasOne("MusicPlataform.Server.Models.Artist", "Artist")
-                        .WithMany("Albums")
-                        .HasForeignKey("ArtistId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Artist");
                 });
 
             modelBuilder.Entity("MusicPlataform.Server.Models.Playlist", b =>
@@ -260,12 +198,6 @@ namespace MusicPlataform.Server.Migrations
 
             modelBuilder.Entity("MusicPlataform.Server.Models.Track", b =>
                 {
-                    b.HasOne("MusicPlataform.Server.Models.Album", "Album")
-                        .WithMany("Tracks")
-                        .HasForeignKey("AlbumId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("MusicPlataform.Server.Models.Artist", "Artist")
                         .WithMany("Tracks")
                         .HasForeignKey("ArtistId")
@@ -277,41 +209,13 @@ namespace MusicPlataform.Server.Migrations
                         .HasForeignKey("GenreId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("Album");
-
                     b.Navigation("Artist");
 
                     b.Navigation("Genre");
                 });
 
-            modelBuilder.Entity("MusicPlataform.Server.Models.TrackLike", b =>
-                {
-                    b.HasOne("MusicPlataform.Server.Models.Track", "Track")
-                        .WithMany("Likes")
-                        .HasForeignKey("TrackId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MusicPlataform.Server.Models.User", "User")
-                        .WithMany("LikedTracks")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Track");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("MusicPlataform.Server.Models.Album", b =>
-                {
-                    b.Navigation("Tracks");
-                });
-
             modelBuilder.Entity("MusicPlataform.Server.Models.Artist", b =>
                 {
-                    b.Navigation("Albums");
-
                     b.Navigation("Tracks");
                 });
 
@@ -327,15 +231,11 @@ namespace MusicPlataform.Server.Migrations
 
             modelBuilder.Entity("MusicPlataform.Server.Models.Track", b =>
                 {
-                    b.Navigation("Likes");
-
                     b.Navigation("Playlists");
                 });
 
             modelBuilder.Entity("MusicPlataform.Server.Models.User", b =>
                 {
-                    b.Navigation("LikedTracks");
-
                     b.Navigation("Playlists");
                 });
 #pragma warning restore 612, 618

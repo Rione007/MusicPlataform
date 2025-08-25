@@ -23,14 +23,12 @@ namespace MusicPlataform.Server.Controllers
         {
             var tracks = _context.Tracks
                 .Include(t => t.Artist)
-                .Include(t => t.Album)
                 .Include(t => t.Genre)
                 .Select(t => new TrackReadDto(
                     t.Id,
                     t.Title,
                     t.DurationSeconds,
                     t.Artist != null ? t.Artist.Name : "Unknown Artist",
-                    t.Album != null ? t.Album.Title : "Unknown Album",
                     t.Genre != null ? t.Genre.Name : null,
                     t.AudioUrl
                 ))
@@ -45,7 +43,6 @@ namespace MusicPlataform.Server.Controllers
         {
             var track = _context.Tracks
                 .Include(t => t.Artist)
-                .Include(t => t.Album)
                 .Include(t => t.Genre)
                 .Where(t => t.Id == id)
                 .Select(t => new TrackReadDto(
@@ -53,7 +50,6 @@ namespace MusicPlataform.Server.Controllers
                     t.Title,
                     t.DurationSeconds,
                     t.Artist != null ? t.Artist.Name : "Unknown Artist",
-                    t.Album != null ? t.Album.Title : "Unknown Album",
                     t.Genre != null ? t.Genre.Name : null,
                     t.AudioUrl
                 ))
@@ -74,7 +70,6 @@ namespace MusicPlataform.Server.Controllers
                 Title = dto.Title,
                 DurationSeconds = dto.DurationSeconds,
                 ArtistId = dto.ArtistId,
-                AlbumId = dto.AlbumId,
                 GenreId = dto.GenreId,
                 AudioUrl = dto.AudioUrl
             };
@@ -85,7 +80,6 @@ namespace MusicPlataform.Server.Controllers
             // Devolver el objeto creado en formato DTO
             var trackRead = _context.Tracks
                 .Include(t => t.Artist)
-                .Include(t => t.Album)
                 .Include(t => t.Genre)
                 .Where(t => t.Id == track.Id)
                 .Select(t => new TrackReadDto(
@@ -93,7 +87,6 @@ namespace MusicPlataform.Server.Controllers
                     t.Title,
                     t.DurationSeconds,
                     t.Artist != null ? t.Artist.Name : "Unknown Artist",
-                    t.Album != null ? t.Album.Title : "Unknown Album",
                     t.Genre != null ? t.Genre.Name : null,
                     t.AudioUrl
                 ))
@@ -113,7 +106,6 @@ namespace MusicPlataform.Server.Controllers
             track.Title = dto.Title;
             track.DurationSeconds = dto.DurationSeconds;
             track.ArtistId = dto.ArtistId;
-            track.AlbumId = dto.AlbumId;
             track.GenreId = dto.GenreId;
             track.AudioUrl = dto.AudioUrl;
 
@@ -121,7 +113,6 @@ namespace MusicPlataform.Server.Controllers
 
             var updatedTrack = _context.Tracks
                 .Include(t => t.Artist)
-                .Include(t => t.Album)
                 .Include(t => t.Genre)
                 .Where(t => t.Id == track.Id)
                 .Select(t => new TrackReadDto(
@@ -129,7 +120,6 @@ namespace MusicPlataform.Server.Controllers
                     t.Title,
                     t.DurationSeconds,
                     t.Artist != null ? t.Artist.Name : "Unknown Artist",
-                    t.Album != null ? t.Album.Title : "Unknown Album",
                     t.Genre != null ? t.Genre.Name : null,
                     t.AudioUrl
                 ))
