@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿@* <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -69,5 +69,53 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html> *@
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - MusicPlataform</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-left">
+            <button class="nav-btn">🏠</button>
+            <input type="text" placeholder="¿Qué quieres reproducir?" class="search">
+        </div>
+        <div class="nav-right">
+            <a href="#">Premium</a>
+            <a href="#">Ayuda</a>
+            <a href="#">Descargar</a>
+            <a asp-controller="Users" asp-action="Login">Iniciar sesión</a>
+            <button class="register" onclick="location.href='@Url.Action("Register", "Users")'">
+                Registrarse
+            </button>
+
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="sidebar">
+            <h2>Tu biblioteca</h2>
+            <a href="#">Mi lista nº 1</a>
+            <a href="#">Mi lista nº 2</a>
+        </div>
+
+        <div class="main">
+            @RenderBody()
+        </div>
+
+        <div class="details" id="details">
+            <h3>Detalles</h3>
+            <p>Aquí aparecerá información de la canción seleccionada.</p>
+        </div>
+    </div>
+
+    <script src="~/js/site.js"></script>
 </body>
 </html>
