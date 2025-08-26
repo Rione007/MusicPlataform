@@ -12,8 +12,8 @@ using MusicPlataform.Server.Data;
 namespace MusicPlataform.Server.Migrations
 {
     [DbContext(typeof(MusicContext))]
-    [Migration("20250825203402_nuevaMigra")]
-    partial class nuevaMigra
+    [Migration("20250825213532_Inicial")]
+    partial class Inicial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,6 +34,9 @@ namespace MusicPlataform.Server.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Bio")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")

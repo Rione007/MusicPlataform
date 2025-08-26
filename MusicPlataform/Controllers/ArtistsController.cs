@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MusicPlataform.Server.Data;
 using MusicPlataform.Server.Models;
 using static MusicPlataform.Server.DTOs.ArtistDtos;
 
 namespace MusicPlataform.Server.Controllers
 {
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class ArtistsController : ControllerBase
@@ -21,7 +23,7 @@ namespace MusicPlataform.Server.Controllers
         public IActionResult GetAllArtists()
         {
             var artists = _context.Artists
-                .Select(a => new ArtistReadDto(a.Id, a.Name, a.Bio))
+                .Select(a => new ArtistReadDto(a.Id, a.Name, a.Bio,a.ImageUrl))
                 .ToList();
 
             return Ok(artists);
@@ -33,7 +35,7 @@ namespace MusicPlataform.Server.Controllers
         {
             var artist = _context.Artists
                 .Where(a => a.Id == id)
-                .Select(a => new ArtistReadDto(a.Id, a.Name, a.Bio))
+                .Select(a => new ArtistReadDto(a.Id, a.Name, a.Bio, a.ImageUrl))
                 .FirstOrDefault();
 
             if (artist == null)
@@ -55,7 +57,7 @@ namespace MusicPlataform.Server.Controllers
             _context.Artists.Add(artist);
             _context.SaveChanges();
 
-            return Ok(new ArtistReadDto(artist.Id, artist.Name, artist.Bio));
+            return Ok(new ArtistReadDto(artist.Id, artist.Name, artist.Bio, artist.ImageUrl));
         }
 
         // PUT: api/artists/5
@@ -71,7 +73,7 @@ namespace MusicPlataform.Server.Controllers
 
             _context.SaveChanges();
 
-            return Ok(new ArtistReadDto(artist.Id, artist.Name, artist.Bio));
+            return Ok(new ArtistReadDto(artist.Id, artist.Name, artist.Bio, artist.ImageUrl));
         }
 
         // DELETE: api/artists/5

@@ -8,7 +8,7 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddHttpClient("MusicApi", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7106/api/"); // 🔹 ajusta al puerto real de tu API
+    client.BaseAddress = new Uri("https://localhost:7106/api/"); 
 });
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -39,7 +39,7 @@ app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Albums}/{action=Index}/{id?}")
+    pattern: "{controller=ArTrack}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 
