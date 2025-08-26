@@ -1,0 +1,43 @@
+﻿@model IEnumerable<MusicPlataform.Client.Models.TrackClient>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="text-white mb-0">Todas las canciones</h2>
+    <a href="@Url.Action("Index", "ArTrack")" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="row g-2 justify-content-start">
+    @foreach (var track in Model)
+    {
+        <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+            <div class="card bg-secondary text-white h-100">
+                <div class="card-body p-2">
+                    <h6 class="card-title text-truncate mb-2 fw-bold">@track.Title</h6>
+                    <p class="mb-1"><strong>Dur:</strong> @(TimeSpan.FromSeconds(track.DurationSeconds).ToString(@"mm\:ss"))</p>
+                    <p class="mb-1 text-truncate"><strong>Art:</strong> @track.Artist</p>
+                    <p class="mb-1 text-truncate"><strong>Gen:</strong> @track.Genre</p>
+                </div>
+                <div class="card-footer bg-dark border-0 py-1 px-2 text-end">
+                    @if (User.Identity.IsAuthenticated && !string.IsNullOrEmpty(track.AudioUrl))
+                    {
+                        <button class="btn btn-outline-light btn-sm"
+                                data-audio="@track.AudioUrl"
+                                data-title="@track.Title"
+                                data-artist="@track.Artist"
+                                onclick="handlePlayClick(this)">
+                            <i class="bi bi-play-fill"></i>
+                        </button>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Login", "Users", new { returnUrl = Url.Action("Index", "ArTrack") })"
+                           class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-play-fill"></i>
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

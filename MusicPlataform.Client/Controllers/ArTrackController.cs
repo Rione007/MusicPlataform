@@ -1,6 +1,8 @@
 ﻿using System.Net.Http;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using MusicPlataform.Client.Models;
 
 namespace MusicPlataform.Client.Controllers
@@ -13,6 +15,56 @@ namespace MusicPlataform.Client.Controllers
         {
             httpClient = httpClientFactory.CreateClient();
             httpClient.BaseAddress = new Uri("https://localhost:7106/api");
+        }
+
+        public async Task<IActionResult> MostrarTracks()
+        {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            }
+            ;
+            var response = await httpClient.GetAsync("api/tracks");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return View(new ArTrackViewModel { Tracks = new List<TrackClient>() });
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            var tracks = JsonSerializer.Deserialize<IEnumerable<TrackClient>>(content, options);
+
+            var viewModel = new ArTrackViewModel
+            {
+                Tracks = tracks?.ToList() ?? new List<TrackClient>()
+            };
+
+            return View(tracks);
+        }
+
+        public async Task<IActionResult> MostrarArtist()
+        {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            }
+            ;
+            var response = await httpClient.GetAsync("api/artists");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return View(new ArTrackViewModel { Artistas = new List<ArtistClient>() });
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            var artists = JsonSerializer.Deserialize<IEnumerable<ArtistClient>>(content, options);
+
+            var viewModel = new ArTrackViewModel
+            {
+                Artistas = artists?.ToList() ?? new List<ArtistClient>()
+            };
+
+            return View(artists);
         }
 
         public async Task<IActionResult> Index()

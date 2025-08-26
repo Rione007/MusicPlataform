@@ -1,48 +1,63 @@
 ﻿@model MusicPlataform.Client.Models.ArtistDetailViewModel
 
-<a href="@Url.Action("Index", "ArTrack")" class="btn btn-secondary mb-3">
+<a href="@Url.Action("Index", "ArTrack")" class="btn btn-dark mb-4">
     <i class="bi bi-arrow-left"></i> Volver
 </a>
 
-<h2>@Model.Artista.Name</h2>
-<img src="@Model.Artista.ImageUrl" alt="@Model.Artista.Name" style="width: 200px;" />
-<p>@Model.Artista.Bio</p>
+<div class="card mb-5 shadow-sm border-0 bg-dark text-white">
+    <div class="row g-0 align-items-center">
+        <div class="col-md-3 text-center p-3">
+            <img src="@Model.Artista.ImageUrl" alt="@Model.Artista.Name"
+                 class="img-fluid rounded-circle border border-light shadow"
+                 style="width: 200px; height: 200px; object-fit: cover;" />
+        </div>
+        <div class="col-md-9 p-4">
+            <h2 class="text-uppercase">@Model.Artista.Name</h2>
+            <p class="text-light">@Model.Artista.Bio</p>
+        </div>
+    </div>
+</div>
 
-<h3>Canciones</h3>
+<h3 class="text-black mb-3">Canciones</h3>
 
 @if (Model.Tracks.Any())
 {
-
-    <ul class="artists-row">
+    <div class="row g-4">
         @foreach (var track in Model.Tracks)
         {
-            <div class="artist-card">
-                <p class="title"><strong>@track.Title</strong></p>
-                <p>Duración: @(TimeSpan.FromSeconds(track.DurationSeconds).ToString(@"mm\:ss"))</p>
-                <p>Artista: @track.Artist</p>
-                <p>Género: @track.Genre</p>
-
-                @if (User.Identity.IsAuthenticated && !string.IsNullOrEmpty(track.AudioUrl))
-                {
-                    <button class="play-button"
-                            data-audio="@track.AudioUrl"
-                            data-title="@track.Title"
-                            data-artist="@track.Artist">
-                        &#9658;
-                    </button>
-
-                }
-                else
-                {
-                    <a href="@Url.Action("Login", "Users", new { returnUrl = Url.Action("Index", "ArTrack") })" class="play-button">&#9658;</a>
-                }
-
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow border-0 bg-secondary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">@track.Title</h5>
+                        <p class="mb-1"><strong>Duración:</strong> @(TimeSpan.FromSeconds(track.DurationSeconds).ToString(@"mm\:ss"))</p>
+                        <p class="mb-1"><strong>Artista:</strong> @track.Artist</p>
+                        <p class="mb-1"><strong>Género:</strong> @track.Genre</p>
+                    </div>
+                    <div class="card-footer bg-dark border-0 text-end">
+                        @if (User.Identity.IsAuthenticated && !string.IsNullOrEmpty(track.AudioUrl))
+                        {
+                            <button class="btn btn-outline-light btn-sm"
+                                    data-audio="@track.AudioUrl"
+                                    data-title="@track.Title"
+                                    data-artist="@track.Artist"
+                                    onclick="handlePlayClick(this)">
+                                <i class="bi bi-play-fill"></i> Reproducir
+                            </button>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Login", "Users", new { returnUrl = Url.Action("Index", "ArTrack") })"
+                               class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-play-fill"></i> Reproducir
+                            </a>
+                        }
+                    </div>
+                </div>
             </div>
-
         }
-    </ul>
+    </div>
 }
 else
 {
-    <p>No hay canciones para este artista.</p>
+    <p class="text-muted">No hay canciones para este artista.</p>
 }
