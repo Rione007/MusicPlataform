@@ -1,0 +1,53 @@
+﻿@model IEnumerable<MusicPlataform.Client.Models.ArtistClient>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="text-white mb-0">Todos los Artistas</h2>
+    <a href="@Url.Action("Index", "ArTrack")" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="row g-3">
+        @foreach (var artist in Model)
+        {
+            var imageUrl = string.IsNullOrEmpty(artist.ImageUrl)
+            ? "/img/default-artist.webp"
+            : artist.ImageUrl.Replace("\\", "/");
+
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2 artist-item">
+                <div class="card text-center shadow-sm border-0 bg-dark text-white" style="padding-top: 10px; padding-bottom: 8px;">
+                    <a href="@Url.Action("ArtistaDetalle", "ArTrack", new { id = artist.Id })"
+                       class="text-decoration-none text-white">
+                        <img src="@imageUrl"
+                             class="card-img-top rounded-circle mx-auto"
+                             alt="@artist.Name"
+                             style="width: 80px; height: 80px; object-fit: cover;">
+                        <div class="card-body py-1 px-2">
+                            <h6 class="card-title artist-name text-uppercase mb-1" style="font-size: 0.85rem;">@artist.Name</h6>
+                            <p class="text-light small artist-bio mb-2" style="font-size: 0.75rem;">
+                                @(string.IsNullOrEmpty(artist.Bio)
+                                                            ? "Sin biografía"
+                                                            : artist.Bio.Substring(0, Math.Min(40, artist.Bio.Length)) + "...")
+                        </p>
+                    </div>
+                </a>
+                <div class="card-footer bg-secondary border-0 py-1">
+                    @if (User.Identity.IsAuthenticated)
+                        {
+                            <a href="@Url.Action("ArtistaDetalle", "ArTrack", new { id = artist.Id })"
+                               class="btn btn-outline-light btn-sm">
+                                <i class="bi bi-play-fill"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Login", "Users", new { returnUrl = Url.Action("Index", "ArTrack") })"
+                               class="btn btn-outline-light btn-sm">
+                                <i class="bi bi-play-fill"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>

@@ -3,23 +3,40 @@
 
 // Write your JavaScript code.
 
-// Buscar por nombre
+// Búsqueda en tiempo real
 
-const searchInput = document.querySelector('.search');
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('search-input');
 
-searchInput.addEventListener('input', () => {
-    const query = searchInput.value.toLowerCase().trim();
-    const albums = document.querySelectorAll('.artists-row');
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.toLowerCase().trim();
 
-    albums.forEach(album => {
-        const title = album.querySelector('.title')?.textContent.toLowerCase() || '';
-        if (title.includes(query)) {
-            album.style.display = '';
-        } else {
-            album.style.display = 'none';
-        }
+        // Filtrar artistas
+        document.querySelectorAll('.artist-item').forEach(item => {
+            const name = item.querySelector('.artist-name')?.textContent.toLowerCase() || '';
+            const bio = item.querySelector('.artist-bio')?.textContent.toLowerCase() || '';
+
+            if (name.includes(query) || bio.includes(query)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        // Filtrar canciones
+        document.querySelectorAll('.track-item').forEach(item => {
+            const title = item.querySelector('.track-title')?.textContent.toLowerCase() || '';
+            const artist = item.querySelector('.track-artist')?.textContent.toLowerCase() || '';
+
+            if (title.includes(query) || artist.includes(query)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
     });
 });
+
 
 //// Mostrar detalles
 //function showDetails(title, img, year, artistId) {
@@ -33,60 +50,78 @@ searchInput.addEventListener('input', () => {
 //}
 
 
-// Footer 
-const audioFooter = document.getElementById('audio-footer');
-const audioElement = document.getElementById('footer-audio');
-const footerImg = document.getElementById('footer-img');
-const footerTitle = document.getElementById('footer-title');
-const footerArtist = document.getElementById('footer-artist');
-const footerPlayBtn = document.getElementById('footer-play');
-const progressBar = document.getElementById('progress-bar');
-const currentTimeSpan = document.getElementById('current-time');
-const totalDurationSpan = document.getElementById('total-duration');
+document.addEventListener('DOMContentLoaded', () => {
+    const audioFooter = document.getElementById('audio-footer');
+    const audioElement = document.getElementById('footer-audio');
+    const footerImg = document.getElementById('footer-img');
+    const footerTitle = document.getElementById('footer-title');
+    const footerArtist = document.getElementById('footer-artist');
+    const footerPlayBtn = document.getElementById('footer-play');
+    const progressBar = document.getElementById('progress-bar');
+    const currentTimeSpan = document.getElementById('current-time');
+    const totalDurationSpan = document.getElementById('total-duration');
 
-function playTrack(audioUrl, title, artist, imgSrc) {
-    audioFooter.style.display = 'flex'; 
+    window.playTrack = function (audioUrl, title, artist, imgSrc) {
+        audioFooter.classList.remove('d-none');
 
-    footerTitle.textContent = title;
-    footerArtist.textContent = artist;
-    footerImg.src = imgSrc;
+        footerTitle.textContent = title;
+        footerArtist.textContent = artist;
+        footerImg.src = imgSrc;
 
-    audioElement.src = audioUrl;
-    audioElement.play();
-
-    footerPlayBtn.textContent = '❚❚'; 
-
-    audioElement.onloadedmetadata = () => {
-        totalDurationSpan.textContent = formatTime(audioElement.duration);
-        progressBar.max = audioElement.duration;
-    };
-
-    audioElement.ontimeupdate = () => {
-        progressBar.value = audioElement.currentTime;
-        currentTimeSpan.textContent = formatTime(audioElement.currentTime);
-    };
-
-    audioElement.onended = () => {
-        footerPlayBtn.textContent = '▶';
-    };
-}
-
-function togglePlay() {
-    if (audioElement.paused) {
+        audioElement.src = audioUrl;
         audioElement.play();
-        footerPlayBtn.textContent = '❚❚';
-    } else {
-        audioElement.pause();
-        footerPlayBtn.textContent = '▶';
+
+        footerPlayBtn.innerHTML = '<i class="bi bi-pause-fill"></i>';
+
+        audioElement.onloadedmetadata = () => {
+            totalDurationSpan.textContent = formatTime(audioElement.duration);
+            progressBar.max = audioElement.duration;
+        };
+
+        audioElement.ontimeupdate = () => {
+            progressBar.value = audioElement.currentTime;
+            currentTimeSpan.textContent = formatTime(audioElement.currentTime);
+        };
+
+        audioElement.onended = () => {
+            footerPlayBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
+        };
+    };
+
+    window.handlePlayClick = function (btn) {
+        const audioUrl = btn.getAttribute('data-audio');
+        const title = btn.getAttribute('data-title');
+        const artist = btn.getAttribute('data-artist');
+        const imgSrc = '/img/default-imagen.webp';
+
+        playTrack(audioUrl, title, artist, imgSrc);
+    };
+
+    window.togglePlay = function () {
+        if (audioElement.paused) {
+            audioElement.play();
+            footerPlayBtn.innerHTML = '<i class="bi bi-pause-fill"></i>';
+        } else {
+            audioElement.pause();
+            footerPlayBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
+        }
+    };
+
+    window.seekAudio = function (event) {
+        audioElement.currentTime = event.target.value;
+    };
+
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
-}
 
-function seekAudio(event) {
-    audioElement.currentTime = event.target.value;
-}
+    document.querySelectorAll('.play-button').forEach(button => {
+        button.addEventListener('click', function () {
+            window.handlePlayClick(this);
+        });
+    });
+});
 
-function formatTime(seconds) {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-}
+

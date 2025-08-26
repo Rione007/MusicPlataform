@@ -12,7 +12,7 @@ using MusicPlataform.Server.Data;
 namespace MusicPlataform.Server.Migrations
 {
     [DbContext(typeof(MusicContext))]
-    [Migration("20250825213532_Inicial")]
+    [Migration("20250826121815_Inicial")]
     partial class Inicial
     {
         /// <inheritdoc />
