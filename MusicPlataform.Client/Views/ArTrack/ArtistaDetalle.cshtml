@@ -1,5 +1,14 @@
 ﻿@model MusicPlataform.Client.Models.ArtistDetailViewModel
 
+@if (TempData["LibrarySuccess"] != null)
+{
+    <div class="alert alert-success">@TempData["LibrarySuccess"]</div>
+}
+@if (TempData["LibraryError"] != null)
+{
+    <div class="alert alert-danger">@TempData["LibraryError"]</div>
+}
+
 <h2>@Model.Artista.Name</h2>
 <img src="@Model.Artista.ImageUrl" alt="@Model.Artista.Name" style="width: 200px;" />
 <p>@Model.Artista.Bio</p>
@@ -8,27 +17,42 @@
 
 @if (Model.Tracks.Any())
 {
-
     <ul class="artists-row">
         @foreach (var track in Model.Tracks)
         {
-            <div class="artist-card">
+            <li class="artist-card">
                 <p class="title"><strong>@track.Title</strong></p>
                 <p>Duración: @(TimeSpan.FromSeconds(track.DurationSeconds).ToString(@"mm\:ss"))</p>
                 <p>Artista: @track.Artist</p>
                 <p>Género: @track.Genre</p>
 
+                @* Botón de play *@
                 @if (User.Identity.IsAuthenticated && !string.IsNullOrEmpty(track.AudioUrl))
                 {
-                    <button class="play-button" onclick="playTrack('@track.AudioUrl', '@track.Title', '@track.Artist', '/img/default-imagen.webp')">&#9658;</button>
+                    <button class="play-button"
+                            onclick="playTrack('@track.AudioUrl', '@track.Title', '@track.Artist', '/img/default-imagen.webp')">
+                        &#9658;
+                    </button>
                 }
                 else
                 {
-                    <a href="@Url.Action("Login", "Users", new { returnUrl = Url.Action("Index", "ArTrack") })" class="play-button">&#9658;</a>
+                    <a href="@Url.Action("Login", "Users", new { returnUrl = Url.Action("Index", "ArTrack") })"
+                       class="play-button">&#9658;</a>
                 }
 
-            </div>
-
+                @* Formulario para añadir a biblioteca *@
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <form asp-controller="ArTrack" asp-action="AddToLibrary" method="post" class="mt-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="trackId" value="@track.Id" />
+                        <input type="hidden" name="artistId" value="@Model.Artista.Id" />
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            ➕ Añadir a mi biblioteca
+                        </button>
+                    </form>
+                }
+            </li>
         }
     </ul>
 }

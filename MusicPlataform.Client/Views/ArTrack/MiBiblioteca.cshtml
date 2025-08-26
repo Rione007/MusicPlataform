@@ -1,0 +1,28 @@
+﻿@model IEnumerable<MusicPlataform.Client.Models.TrackClient>
+
+<h2>🎵 Mi Biblioteca</h2>
+
+@if (Model != null && Model.Any())
+{
+    <ul class="list-group">
+        @foreach (var track in Model)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>@track.Title</strong> - @track.Artist
+                </div>
+                <div>
+                    <button class="btn btn-sm btn-primary" onclick="playTrack('@track.AudioUrl', '@track.Title', '@track.Artist')">▶️ Reproducir</button>
+                    <form asp-controller="ArTrack" asp-action="RemoveFromLibrary" method="post" style="display:inline;">
+                        <input type="hidden" name="trackId" value="@track.Id" />
+                        <button type="submit" class="btn btn-sm btn-danger">➖ Quitar</button>
+                    </form>
+                </div>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>No tienes canciones en tu biblioteca todavía.</p>
+}

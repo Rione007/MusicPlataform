@@ -1,0 +1,22 @@
+@model IEnumerable<MusicPlataform.Client.Models.PlaylistClient>
+
+<div class="sidebar">
+    <h2>Tu biblioteca</h2>
+    @if (!User.Identity.IsAuthenticated)
+    {
+        <p><a href="/Users/Login">Inicia sesión para ver tu biblioteca</a></p>
+    }
+    else
+    {
+        <ul class="list-unstyled">
+            @foreach (var p in Model.Take(20))
+            {
+                <li><a href="/Playlists/Details/@p.Id">@p.Name</a></li>
+            }
+            @if (!Model.Any())
+            {
+                <li><em>No hay listas aún</em></li>
+            }
+        </ul>
+    }
+</div>

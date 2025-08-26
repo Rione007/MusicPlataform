@@ -1,5 +1,4 @@
-﻿
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
@@ -16,16 +15,41 @@
             <a href="#">Premium</a>
             <a href="#">Ayuda</a>
             <a href="#">Descargar</a>
-            <a asp-controller="Users" asp-action="Logout">Cerrar sesión</a>
+
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                <a asp-controller="Users" asp-action="Logout">Cerrar sesión (@User.Identity.Name)</a>
+            }
+            else
+            {
+                <a asp-controller="Users" asp-action="Login">Iniciar sesión</a>
+            }
         </div>
     </header>
 
     <div class="container">
         <div class="sidebar">
             <h2>Tu biblioteca</h2>
-            <a href="#">Mi lista nº 1</a>
-            <a href="#">Mi lista nº 2</a>
+
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="ArTrack" asp-action="MiBiblioteca">🎵 Mi Biblioteca</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Playlists" asp-action="UserLibrary" asp-route-username="@User.Identity.Name">
+                            📂 Mis Playlists
+                        </a>
+                    </li>
+                </ul>
+            }
+            else
+            {
+                <span>Inicia sesión para ver tu biblioteca</span>
+            }
         </div>
+
 
         <div class="inicio">
             @RenderBody()
@@ -59,5 +83,26 @@
 
     <script src="/js/site.js"></script>
     @RenderSection("Scripts", required: false)
+
+    <script>
+        // Función para añadir canciones a la biblioteca
+        async function addToLibrary(trackId) {
+            const username = "@User.Identity?.Name";
+
+            if (!username) {
+                alert("Debes iniciar sesión para usar la biblioteca.");
+                return;
+            }
+
+            const response = await fetch(`/api/playlists/user/${username}/library/addtrack`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ trackId: trackId })
+            });
+
+            const data = await response.json();
+            alert(data.message);
+        }
+    </script>
 </body>
 </html>

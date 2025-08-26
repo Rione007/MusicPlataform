@@ -161,5 +161,123 @@ namespace MusicPlataform.Server.Controllers
 
             return Ok(new { Message = "Track eliminado con éxito", playlistId, trackId });
         }
+
+        // ✅ POST: api/playlists/user/{username}/library/addtrack
+        // Adds the given track to the user's single "Mi Biblioteca" playlist.
+        [HttpPost("user/{username}/library/addtrack")]
+        public IActionResult AddTrackToUserLibrary(string username, [FromBody] PlaylistAddTrackDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+                return BadRequest(new { Message = "Username requerido" });
+
+            var user = _context.Users.FirstOrDefault(u => u.Username == username);
+            if (user == null)
+                return NotFound(new { Message = "Usuario no encontrado" });
+
+            var track = _context.Tracks.Find(dto.TrackId);
+            if (track == null)
+                return NotFound(new { Message = "Track no encontrado" });
+
+            // Use a single playlist named "Mi Biblioteca" for each user
+            var libraryName = "Mi Biblioteca";
+            var playlist = _context.Playlists
+                .Include(p => p.Tracks)
+                .FirstOrDefault(p => p.OwnerId == user.Id && p.Name == libraryName);
+
+            if (playlist == null)
+            {
+                playlist = new Playlist
+                {
+                    Name = libraryName,
+                    OwnerId = user.Id,
+                    IsPublic = false
+                };
+                _context.Playlists.Add(playlist);
+                _context.SaveChanges();
+            }
+
+            // Check if the track is already present in this library
+            var existing = _context.PlaylistTracks
+                .FirstOrDefault(pt => pt.PlaylistId == playlist.Id && pt.TrackId == dto.TrackId);
+
+            if (existing != null)
+                return BadRequest(new { Message = "Track ya agregado en la biblioteca del usuario" });
+
+            var playlistTrack = new PlaylistTrack
+            {
+                PlaylistId = playlist.Id,
+                TrackId = dto.TrackId,
+                Order = (_context.PlaylistTracks.Count(pt => pt.PlaylistId == playlist.Id)) + 1,
+                AddedAt = DateTime.UtcNow
+            };
+
+            _context.PlaylistTracks.Add(playlistTrack);
+            _context.SaveChanges();
+
+            return Ok(new { Message = "Track agregado a la biblioteca de usuario", playlistId = playlist.Id, trackId = dto.TrackId });
+        }
+
+
+        // GET: api/playlists/user/{username}
+        [HttpGet("user/{username}")]
+        public ActionResult<IEnumerable<PlaylistReadDto>> GetPlaylistsForUser(string username)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+                return BadRequest();
+
+            var user = _context.Users.FirstOrDefault(u => u.Username == username);
+            if (user == null) return NotFound();
+
+            var playlists = _context.Playlists
+            .Include(p => p.Tracks) // ⚡ asegúrate de incluir la relación
+            .Where(p => p.OwnerId == user.Id)
+            .Select(p => new PlaylistReadDto(
+                p.Id,
+                p.Name,
+                p.OwnerId,
+                p.IsPublic,
+                p.Tracks.Select(pt => pt.TrackId) // 👈 usa siempre "Tracks"
+            ))
+            .ToList();
+
+
+            return Ok(playlists);
+        }
+
+        // ✅ GET: api/playlists/user/{username}/library
+        // Devuelve todos los tracks de la biblioteca del usuario
+        // ✅ GET: api/playlists/user/{username}/library
+        // Devuelve todos los tracks de la biblioteca del usuario (solo nombre y audio)
+        [HttpGet("user/{username}/library")]
+        public IActionResult GetUserLibrary(string username)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+                return BadRequest(new { Message = "Username requerido" });
+
+            var user = _context.Users.FirstOrDefault(u => u.Username == username);
+            if (user == null)
+                return NotFound(new { Message = "Usuario no encontrado" });
+
+            var libraryName = "Mi Biblioteca";
+            var playlist = _context.Playlists
+                .Include(p => p.Tracks)
+                    .ThenInclude(pt => pt.Track)
+                .FirstOrDefault(p => p.OwnerId == user.Id && p.Name == libraryName);
+
+            if (playlist == null)
+                return Ok(new List<object>()); // si no existe aún, devolvemos vacío
+
+            var tracks = playlist.Tracks
+                .Select(pt => new {
+                    Title = pt.Track.Title,
+                    AudioUrl = pt.Track.AudioUrl
+                })
+                .ToList();
+
+            return Ok(tracks);
+        }
+
+
+
     }
 }
