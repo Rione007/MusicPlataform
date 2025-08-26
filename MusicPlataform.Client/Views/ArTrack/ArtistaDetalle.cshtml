@@ -1,0 +1,38 @@
+﻿@model MusicPlataform.Client.Models.ArtistDetailViewModel
+
+<h2>@Model.Artista.Name</h2>
+<img src="@Model.Artista.ImageUrl" alt="@Model.Artista.Name" style="width: 200px;" />
+<p>@Model.Artista.Bio</p>
+
+<h3>Canciones</h3>
+
+@if (Model.Tracks.Any())
+{
+
+    <ul class="artists-row">
+        @foreach (var track in Model.Tracks)
+        {
+            <div class="artist-card">
+                <p class="title"><strong>@track.Title</strong></p>
+                <p>Duración: @(TimeSpan.FromSeconds(track.DurationSeconds).ToString(@"mm\:ss"))</p>
+                <p>Artista: @track.Artist</p>
+                <p>Género: @track.Genre</p>
+
+                @if (User.Identity.IsAuthenticated && !string.IsNullOrEmpty(track.AudioUrl))
+                {
+                    <button class="play-button" onclick="playTrack('@track.AudioUrl', '@track.Title', '@track.Artist', '/img/default-imagen.webp')">&#9658;</button>
+                }
+                else
+                {
+                    <a href="@Url.Action("Login", "Users", new { returnUrl = Url.Action("Index", "ArTrack") })" class="play-button">&#9658;</a>
+                }
+
+            </div>
+
+        }
+    </ul>
+}
+else
+{
+    <p>No hay canciones para este artista.</p>
+}

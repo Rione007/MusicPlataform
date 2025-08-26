@@ -8,5 +8,7 @@ namespace MusicPlataform.Client.Controllers
         {
             return View();
         }
+
+
     }
 }

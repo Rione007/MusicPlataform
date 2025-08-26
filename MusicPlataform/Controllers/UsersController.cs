@@ -1,13 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Cryptography;
+using System.Text;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MusicPlataform.Server.Data;
 using MusicPlataform.Server.Models;
 using static MusicPlataform.Server.DTOs.UserDtO;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace MusicPlataform.Server.Controllers
 {
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MusicPlataform.Server.Data;
 using MusicPlataform.Server.Models;
@@ -6,6 +7,7 @@ using static MusicPlataform.Server.DTOs.TrackDtos;
 
 namespace MusicPlataform.Server.Controllers
 {
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class TracksController : ControllerBase
@@ -16,6 +18,7 @@ namespace MusicPlataform.Server.Controllers
         {
             _context = context;
         }
+
 
         // GET: api/tracks
         [HttpGet]
