@@ -70,7 +70,7 @@ namespace MusicPlataform.Server.Controllers
 
         // POST: api/users/login
         [HttpPost("login")]
-        public IActionResult Login(UserCreateDto dto)
+        public IActionResult Login(UserLogeoDto dto)
         {
             var user = _context.Users.FirstOrDefault(u => u.Username == dto.Username);
             if (user == null)
@@ -80,7 +80,7 @@ namespace MusicPlataform.Server.Controllers
             if (!VerifyPassword(dto.Password, user.PasswordHash))
                 return Unauthorized("Contraseña incorrecta");
 
-            return Ok(new UserReadDto(user.Username, user.Email, user.CreatedAt));
+            return Ok(new UserLoginDto(user.Id,user.Username, user.Email));
         }
 
         // PUT: api/users/5
@@ -91,7 +91,7 @@ namespace MusicPlataform.Server.Controllers
             if (user == null)
                 return NotFound();
 
-            user.Username = dto.Username;
+            // Username NO se cambia
             user.Email = dto.Email;
 
             if (!string.IsNullOrWhiteSpace(dto.Password))

@@ -51,7 +51,8 @@ namespace MusicPlataform.Server.Controllers
             var artist = new Artist
             {
                 Name = dto.Name,
-                Bio = dto.Bio
+                Bio = dto.Bio,
+                ImageUrl = dto.ImageUrl
             };
 
             _context.Artists.Add(artist);

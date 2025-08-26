@@ -91,7 +91,7 @@ namespace MusicPlataform.Server.Controllers
                     t.DurationSeconds,
                     t.Artist != null ? t.Artist.Name : "Unknown Artist",
                     t.Genre != null ? t.Genre.Name : null,
-                    t.AudioUrl
+                    t.AudioUrl != null? t.AudioUrl: null
                 ))
                 .FirstOrDefault();
 

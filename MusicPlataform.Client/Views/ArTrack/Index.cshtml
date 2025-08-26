@@ -1,72 +1,85 @@
 ﻿@model MusicPlataform.Client.Models.ArTrackViewModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Inicio";
 }
 
-<h1>Inicio</h1>
-
-<div class="sidebar">
-    <h2>Tu biblioteca</h2>
-    <a href="#">Mi lista nº 1</a>
-    <a href="#">Mi lista nº 2</a>
-</div>
-
-<div class="main">
-    <h2 class="section-title">Artistas destacados</h2>
-    <div class="artists-row">
+<!-- Artistas destacados -->
+<div class="mb-5">
+    <h2 class="mb-4">🎤 Artistas destacados</h2>
+    <div class="row g-4">
         @foreach (var artist in Model.Artistas)
         {
             var imageUrl = string.IsNullOrEmpty(artist.ImageUrl)
             ? "/img/default-artist.jpg"
             : artist.ImageUrl.Replace("\\", "/");
 
-            <a href="@Url.Action("ArtistaDetalle", "ArTrack", new { id = artist.Id })" class="artist-card-link">
-                <div class="artist-card">
-                    <img src="@imageUrl" alt="@artist.Name" />
-                    <p class="title"><strong>@artist.Name</strong></p>
-                    <p>
-                        @(string.IsNullOrEmpty(artist.Bio)
-                                            ? "Sin biografía"
-                                            : artist.Bio.Substring(0, Math.Min(60, artist.Bio.Length)) + "...")
-                </p>
-                @if (User.Identity.IsAuthenticated)
-                    {
-                        <button class="play-button">&#9658;</button>
-                    }
-                    else
-                    {
-                        <a href="@Url.Action("Login", "Users", new { returnUrl = Url.Action("Index", "ArTrack") })" class="play-button">&#9658;</a>
-                    }
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                <div class="card h-100 text-center shadow-sm border-0">
+                    <a href="@Url.Action("ArtistaDetalle", "ArTrack", new { id = artist.Id })" class="text-decoration-none text-dark">
+                        <img src="@imageUrl" class="card-img-top rounded-circle p-3" alt="@artist.Name" style="aspect-ratio:1/1; object-fit:cover;">
+                        <div class="card-body">
+                            <h6 class="card-title">@artist.Name</h6>
+                            <p class="text-muted small">
+                                @(string.IsNullOrEmpty(artist.Bio)
+                                                            ? "Sin biografía"
+                                                            : artist.Bio.Substring(0, Math.Min(40, artist.Bio.Length)) + "...")
+                        </p>
+                    </div>
+                </a>
+                <div class="card-footer bg-white border-0">
+                    @if (User.Identity.IsAuthenticated)
+                        {
+                            <button class="btn btn-outline-success btn-sm">
+                                <i class="bi bi-play-fill"></i>
+                            </button>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Login", "Users", new { returnUrl = Url.Action("Index", "ArTrack") })"
+                               class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-play-fill"></i>
+                            </a>
+                        }
+                    </div>
                 </div>
-            </a>
-
+            </div>
         }
     </div>
 </div>
 
-<div class="main">
-    <h2 class="section-title">Canciones destacadas</h2>
-    <div class="artists-row">
+<!-- Canciones destacadas -->
+<div>
+    <h2 class="mb-4">🎶 Canciones destacadas</h2>
+    <div class="row g-4">
         @foreach (var track in Model.Tracks)
         {
-            <div class="artist-card">
-                <p class="title"><strong>@track.Title</strong></p>
-                <p>Duración: @(TimeSpan.FromSeconds(track.DurationSeconds).ToString(@"mm\:ss"))</p>
-                <p>Artista: @track.Artist</p>
-                <p>Género: @track.Genre</p>
-
-                @if (User.Identity.IsAuthenticated && !string.IsNullOrEmpty(track.AudioUrl))
-                {
-                    <button class="play-button" onclick="playTrack('@track.AudioUrl', '@track.Title', '@track.Artist', '/img/default-imagen.webp')">&#9658;</button>
-                }
-                else
-                {
-                    <a href="@Url.Action("Login", "Users", new { returnUrl = Url.Action("Index", "ArTrack") })" class="play-button">&#9658;</a>
-                }
-
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100 border-0">
+                    <div class="card-body">
+                        <h6 class="card-title">@track.Title</h6>
+                        <p class="mb-1"><strong>Duración:</strong> @(TimeSpan.FromSeconds(track.DurationSeconds).ToString(@"mm\:ss"))</p>
+                        <p class="mb-1"><strong>Artista:</strong> @track.Artist</p>
+                        <p class="mb-1"><strong>Género:</strong> @track.Genre</p>
+                    </div>
+                    <div class="card-footer bg-white border-0 text-end">
+                        @if (User.Identity.IsAuthenticated && !string.IsNullOrEmpty(track.AudioUrl))
+                        {
+                            <button class="btn btn-success btn-sm"
+                                    onclick="playTrack('@track.AudioUrl', '@track.Title', '@track.Artist', '/img/default-imagen.webp')">
+                                <i class="bi bi-play-fill"></i> Reproducir
+                            </button>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Login", "Users", new { returnUrl = Url.Action("Index", "ArTrack") })"
+                               class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-play-fill"></i> Reproducir
+                            </a>
+                        }
+                    </div>
+                </div>
             </div>
-
         }
     </div>
 </div>

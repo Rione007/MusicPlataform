@@ -1,0 +1,76 @@
+﻿@model MusicPlataform.Client.Models.UserClient
+@{
+    ViewData["Title"] = "Perfil";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">👤 Mi Perfil</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <form asp-action="Profile" method="post" class="card shadow-sm p-4">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="mb-3">
+            <label asp-for="Username" class="form-label"></label>
+            <input asp-for="Username" class="form-control" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="container ">
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-save"></i> Guardar cambios
+            </button>
+
+            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                Cambiar contraseña
+            </button>
+        </div>
+
+
+    </form>
+
+    <!-- Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="ChangePassword" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="changePasswordLabel">Cambiar contraseña</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="CurrentPassword" class="form-label">Contraseña actual</label>
+                            <input type="password" class="form-control" name="CurrentPassword" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="NewPassword" class="form-label">Nueva contraseña</label>
+                            <input type="password" class="form-control" name="NewPassword" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="ConfirmPassword" class="form-label">Confirmar nueva contraseña</label>
+                            <input type="password" class="form-control" name="ConfirmPassword" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

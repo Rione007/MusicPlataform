@@ -1,13 +1,14 @@
-﻿using System.Net.Http;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using MusicPlataform.Client.Models;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using MusicPlataform.Client.Models;
 
 namespace MusicPlataform.Client.Controllers
 {
@@ -57,7 +58,6 @@ namespace MusicPlataform.Client.Controllers
         // GET: Users/Login
         public IActionResult Login()
         {
-            ViewData["Layout"] = "_Layout2";
             return View();
         }
 
@@ -85,36 +85,148 @@ namespace MusicPlataform.Client.Controllers
 
             if (response.IsSuccessStatusCode)
             {
-                var claims = new List<Claim>
+                // 👇 Aquí leemos el JSON con los datos del usuario
+                var json = await response.Content.ReadAsStringAsync();
+                var user = JsonSerializer.Deserialize<UserClient>(json, new JsonSerializerOptions
                 {
-                    new Claim(ClaimTypes.Name, model.Username),
-                };
+                    PropertyNameCaseInsensitive = true
+                });
 
-                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var principal = new ClaimsPrincipal(identity);
+                if (user != null)
+                {
+                    var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim("UserId", user.Id.ToString())
+            };
 
-                await HttpContext.SignInAsync
-                (
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    principal,
-                    new AuthenticationProperties
-                    {
-                        IsPersistent = true, 
-                        ExpiresUtc = DateTime.UtcNow.AddHours(1)
-                    }
-                );
+                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var principal = new ClaimsPrincipal(identity);
 
-                return RedirectToAction("Index", "ArTrack");
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        principal,
+                        new AuthenticationProperties
+                        {
+                            IsPersistent = true,
+                            ExpiresUtc = DateTime.UtcNow.AddHours(1)
+                        });
+
+                    return RedirectToAction("Index", "ArTrack");
+                }
             }
+
             ModelState.AddModelError("", "Usuario o contraseña incorrectos");
             return View(model);
         }
+
 
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "ArTrack");
         }
+
+        // GET: Perfil
+        public async Task<IActionResult> Profile()
+        {
+            var userId = User.FindFirst("UserId")?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+                return RedirectToAction("Login");
+
+            var client = _httpClientFactory.CreateClient("MusicApi");
+            var response = await client.GetAsync($"users/{userId}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "No se pudieron cargar los datos.";
+                return RedirectToAction("Index", "ArTrack");
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+            var user = JsonSerializer.Deserialize<UserClient>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            return View(user);
+        }
+
+        // POST: Actualizar perfil
+        [HttpPost]
+        public async Task<IActionResult> Profile(UserClient model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var client = _httpClientFactory.CreateClient("MusicApi");
+
+            // IMPORTANTE: el Username no se debe cambiar, así que no se envía modificado
+            var dto = new
+            {
+                Id = model.Id,
+                Username = model.Username, 
+                Email = model.Email
+            };
+
+            var content = new StringContent(
+                JsonSerializer.Serialize(dto),
+                Encoding.UTF8,
+                "application/json");
+
+            var response = await client.PutAsync($"users/{model.Id}", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Success"] = "Perfil actualizado correctamente.";
+                return RedirectToAction("Profile");
+            }
+
+            ModelState.AddModelError("", "Error al actualizar el perfil.");
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(string CurrentPassword, string NewPassword, string ConfirmPassword)
+        {
+            if (NewPassword != ConfirmPassword)
+            {
+                TempData["Error"] = "Las contraseñas no coinciden.";
+                return RedirectToAction("Profile");
+            }
+
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return RedirectToAction("Login");
+
+            var client = _httpClientFactory.CreateClient("MusicApi");
+
+            var dto = new
+            {
+                Id = userId,
+                Password = NewPassword
+            };
+
+            var content = new StringContent(
+                JsonSerializer.Serialize(dto),
+                Encoding.UTF8,
+                "application/json");
+
+            var response = await client.PutAsync($"users/{userId}", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Success"] = "Contraseña actualizada correctamente.";
+            }
+            else
+            {
+                TempData["Error"] = "Error al actualizar la contraseña.";
+            }
+
+            return RedirectToAction("Profile");
+        }
+
 
     }
 }
