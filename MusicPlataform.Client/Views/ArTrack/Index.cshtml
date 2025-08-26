@@ -1,4 +1,6 @@
 ﻿@model MusicPlataform.Client.Models.ArTrackViewModel
+@using System.Web
+
 
 @{
     ViewData["Title"] = "Inicio";
@@ -11,28 +13,29 @@
         @foreach (var artist in Model.Artistas)
         {
             var imageUrl = string.IsNullOrEmpty(artist.ImageUrl)
-            ? "/img/default-artist.jpg"
+            ? "/img/default-artist.webp"
             : artist.ImageUrl.Replace("\\", "/");
 
-            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2 artist-item">
                 <div class="card h-100 text-center shadow-sm border-0">
                     <a href="@Url.Action("ArtistaDetalle", "ArTrack", new { id = artist.Id })" class="text-decoration-none text-dark">
                         <img src="@imageUrl" class="card-img-top rounded-circle p-3" alt="@artist.Name" style="aspect-ratio:1/1; object-fit:cover;">
                         <div class="card-body">
-                            <h6 class="card-title">@artist.Name</h6>
-                            <p class="text-muted small">
+                            <h6 class="card-title artist-name">@artist.Name</h6>
+                            <p class="text-muted small artist-bio">
                                 @(string.IsNullOrEmpty(artist.Bio)
                                                             ? "Sin biografía"
                                                             : artist.Bio.Substring(0, Math.Min(40, artist.Bio.Length)) + "...")
-                        </p>
-                    </div>
-                </a>
+                            </p>
+                        </div>
+                    </a>
                 <div class="card-footer bg-white border-0">
                     @if (User.Identity.IsAuthenticated)
                         {
-                            <button class="btn btn-outline-success btn-sm">
+                            <a href="@Url.Action("ArtistaDetalle", "ArTrack", new { id = artist.Id })" class="btn btn-outline-success btn-sm">
                                 <i class="bi bi-play-fill"></i>
-                            </button>
+                            </a>
+
                         }
                         else
                         {
@@ -54,20 +57,22 @@
     <div class="row g-4">
         @foreach (var track in Model.Tracks)
         {
-            <div class="col-12 col-md-6 col-lg-4">
+            <div class="col-12 col-md-6 col-lg-4 track-item">
                 <div class="card shadow-sm h-100 border-0">
                     <div class="card-body">
-                        <h6 class="card-title">@track.Title</h6>
+                        <h6 class="card-title track-title">@track.Title</h6>
                         <p class="mb-1"><strong>Duración:</strong> @(TimeSpan.FromSeconds(track.DurationSeconds).ToString(@"mm\:ss"))</p>
-                        <p class="mb-1"><strong>Artista:</strong> @track.Artist</p>
+                        <p class="mb-1 track-artist"><strong>Artista:</strong> @track.Artist</p>
                         <p class="mb-1"><strong>Género:</strong> @track.Genre</p>
                     </div>
                     <div class="card-footer bg-white border-0 text-end">
                         @if (User.Identity.IsAuthenticated && !string.IsNullOrEmpty(track.AudioUrl))
                         {
-                            <button class="btn btn-success btn-sm"
-                                    onclick="playTrack('@track.AudioUrl', '@track.Title', '@track.Artist', '/img/default-imagen.webp')">
-                                <i class="bi bi-play-fill"></i> Reproducir
+                            <button class="play-button"
+                                    data-audio="@track.AudioUrl"
+                                    data-title="@track.Title"
+                                    data-artist="@track.Artist">
+                                &#9658;
                             </button>
                         }
                         else
@@ -83,3 +88,6 @@
         }
     </div>
 </div>
+@section Scripts {
+    <script src="~/js/site.js"></script>
+}
