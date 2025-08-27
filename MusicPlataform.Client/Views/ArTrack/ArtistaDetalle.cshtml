@@ -36,7 +36,7 @@
                     <div class="card-footer bg-dark border-0 py-1 px-2 text-end">
                         @if (User.Identity.IsAuthenticated && !string.IsNullOrEmpty(track.AudioUrl))
                         {
-                            <button class="btn btn-outline-light btn-sm"
+                            <button class="btn btn-outline-light btn-sm play-button"
                                     data-audio="@track.AudioUrl"
                                     data-title="@track.Title"
                                     data-artist="@track.Artist"
@@ -44,7 +44,6 @@
                                 <i class="bi bi-play-fill"></i>
                             </button>
                             <button class="btn btn-warning btn-sm ms-1" onclick="addToLibrary(@track.Id, this)">+PlayList</button>
-            
                         }
                         else
                         {
@@ -62,4 +61,8 @@
 else
 {
     <p class="text-muted">No hay canciones para este artista.</p>
+}
+
+@section Scripts {
+    <script src="~/js/site.js"></script>
 }

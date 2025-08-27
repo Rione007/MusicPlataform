@@ -15,8 +15,19 @@ builder.Services.AddDbContext<MusicContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("cnx"));
 });
 
-builder.Services.AddControllers();
+// Agrega la política CORS aquí
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.WithOrigins("https://localhost:7112") 
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -28,6 +39,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Usa el middleware CORS ANTES de Authorization y MapControllers
+app.UseCors("AllowFrontend");
 
 app.UseAuthorization();
 
