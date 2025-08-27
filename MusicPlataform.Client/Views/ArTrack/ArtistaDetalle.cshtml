@@ -25,15 +25,15 @@
     <div class="row g-4">
         @foreach (var track in Model.Tracks)
         {
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card h-100 shadow border-0 bg-secondary text-white">
-                    <div class="card-body">
-                        <h5 class="card-title">@track.Title</h5>
-                        <p class="mb-1"><strong>Duración:</strong> @(TimeSpan.FromSeconds(track.DurationSeconds).ToString(@"mm\:ss"))</p>
-                        <p class="mb-1"><strong>Artista:</strong> @track.Artist</p>
-                        <p class="mb-1"><strong>Género:</strong> @track.Genre</p>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                <div class="card bg-secondary text-white h-100">
+                    <div class="card-body p-2">
+                        <h6 class="card-title text-truncate mb-2 fw-bold">@track.Title</h6>
+                        <p class="mb-1"><strong>Dur:</strong> @(TimeSpan.FromSeconds(track.DurationSeconds).ToString(@"mm\:ss"))</p>
+                        <p class="mb-1 text-truncate"><strong>Art:</strong> @track.Artist</p>
+                        <p class="mb-1 text-truncate"><strong>Gen:</strong> @track.Genre</p>
                     </div>
-                    <div class="card-footer bg-dark border-0 text-end">
+                    <div class="card-footer bg-dark border-0 py-1 px-2 text-end">
                         @if (User.Identity.IsAuthenticated && !string.IsNullOrEmpty(track.AudioUrl))
                         {
                             <button class="btn btn-outline-light btn-sm"
@@ -41,14 +41,14 @@
                                     data-title="@track.Title"
                                     data-artist="@track.Artist"
                                     onclick="handlePlayClick(this)">
-                                <i class="bi bi-play-fill"></i> Reproducir
+                                <i class="bi bi-play-fill"></i>
                             </button>
                         }
                         else
                         {
                             <a href="@Url.Action("Login", "Users", new { returnUrl = Url.Action("Index", "ArTrack") })"
                                class="btn btn-outline-secondary btn-sm">
-                                <i class="bi bi-play-fill"></i> Reproducir
+                                <i class="bi bi-play-fill"></i>
                             </a>
                         }
                     </div>
