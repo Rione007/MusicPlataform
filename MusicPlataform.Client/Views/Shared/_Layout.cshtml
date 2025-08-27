@@ -81,28 +81,48 @@
         </div>
     </div>
 
-    <!-- Footer player -->
+    <!-- Footer -->
     <footer id="audio-footer" class="bg-dark text-white p-3 fixed-bottom d-none">
         <div class="d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center">
+
+            <div class="d-flex align-items-center" style="min-width: 250px; max-width: 250px;">
                 <img id="footer-img" src="" alt="" style="width:50px; height:50px; object-fit:cover; margin-right:10px;" />
                 <div>
-                    <div id="footer-title">Título</div>
-                    <div id="footer-artist">Artista</div>
+                    <div id="footer-title" class="text-truncate" style="max-width: 180px;">Título largo que se corta...</div>
+                    <div id="footer-artist" class="text-truncate" style="max-width: 180px;">Artista muy largo...</div>
                 </div>
             </div>
 
+            <div class="d-flex flex-column align-items-center justify-content-center flex-grow-1">
+                <div class="d-flex align-items-center mb-2">
+                    <span id="current-time" class="me-2">0:00</span>
+                    <input type="range" class="form-range me-2" id="progress-bar" value="0" min="0" max="100" step="0.1" onchange="seekAudio(event)" style="width:300px;">
+                    <span id="total-duration">0:00</span>
+                </div>
+
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-light btn-sm me-2" id="footer-prev" onclick="playPreviousTrack()" disabled>
+                        <i class="bi bi-skip-backward-fill"></i>
+                    </button>
+                    <button class="btn btn-light btn-sm me-2" id="footer-play" onclick="togglePlay()">
+                        <i class="bi bi-play-fill"></i>
+                    </button>
+                    <button class="btn btn-light btn-sm" id="footer-next" onclick="playRandomTrack()">
+                        <i class="bi bi-skip-forward-fill"></i>
+                    </button>
+                </div>
+
+            </div>
+
+
             <div class="d-flex align-items-center">
-                <button class="btn btn-light btn-sm me-2" id="footer-play" onclick="togglePlay()">
-                    <i class="bi bi-play-fill"></i>
-                </button>
-                <span id="current-time" class="me-2">0:00</span>
-                <input type="range" class="form-range me-2" id="progress-bar" value="0" min="0" max="100" step="0.1" onchange="seekAudio(event)" style="width:200px;">
-                <span id="total-duration">0:00</span>
+                <i class="bi bi-volume-up-fill me-2"></i>
+                <input type="range" class="form-range" id="volume-control" min="0" max="1" step="0.01" value="1" style="width:100px;">
             </div>
         </div>
         <audio id="footer-audio"></audio>
     </footer>
+
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js"></script>

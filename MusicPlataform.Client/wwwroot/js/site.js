@@ -49,9 +49,9 @@ document.addEventListener('DOMContentLoaded', () => {
 //    `;
 //}
 
-// Reproductor de audio en el footer
+// Reproducir canciones --> DAVID
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const audioFooter = document.getElementById('audio-footer');
     const audioElement = document.getElementById('footer-audio');
     const footerImg = document.getElementById('footer-img');
@@ -61,21 +61,92 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressBar = document.getElementById('progress-bar');
     const currentTimeSpan = document.getElementById('current-time');
     const totalDurationSpan = document.getElementById('total-duration');
+    const prevBtn = document.getElementById('footer-prev');
+    const nextBtn = document.getElementById('footer-next');
 
     let lastActiveButton = null;
+    let allTracks = [];
+    let currentTrackIndex = -1;
+    let audioHistory = [];
+    let shuffledIndices = [];
+    let shuffledPos = 0;
+
+    async function loadAllTracks() {
+        try {
+            const response = await fetch('https://localhost:7106/api/tracks');
+            if (!response.ok) throw new Error(`Error al cargar canciones: ${response.status}`);
+
+            const data = await response.json();
+
+            allTracks = data.map(track => ({
+                audioUrl: location.origin + track.audioUrl,  
+                title: track.title,
+                artist: track.artist,
+                imgSrc: '/img/default-imagen.webp'
+            }));
+
+            console.log('Canciones cargadas:', allTracks);
+
+            if (allTracks.length > 0 && nextBtn) nextBtn.disabled = false;
+            if (prevBtn) prevBtn.disabled = true;
+
+        } catch (error) {
+            console.error('Error al cargar canciones:', error);
+        }
+    }
+
+    await loadAllTracks();
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function initShuffle() {
+        shuffledIndices = allTracks.map((_, i) => i);
+        shuffleArray(shuffledIndices);
+        shuffledPos = 0;
+    }
 
     window.playTrack = function (audioUrl, title, artist, imgSrc) {
-        audioFooter.classList.remove('d-none');
+        // Restaurar ícono del último botón activo
+        if (lastActiveButton) {
+            lastActiveButton.innerHTML = '<i class="bi bi-play-fill"></i>';
+            lastActiveButton = null;
+        }
 
+        // Buscar el índice de la canción actual
+        const newIndex = allTracks.findIndex(t => t.audioUrl === audioUrl);
+        if (currentTrackIndex !== -1 && newIndex !== currentTrackIndex) {
+            audioHistory.push(currentTrackIndex);
+            if (prevBtn) prevBtn.disabled = false;
+        }
+        currentTrackIndex = newIndex;
+
+        // Reproducir audio
+        audioFooter.classList.remove('d-none');
         footerTitle.textContent = title;
         footerArtist.textContent = artist;
-        footerImg.src = imgSrc;
-
+        footerImg.src = imgSrc || '/img/default-imagen.webp';
         audioElement.src = audioUrl;
         audioElement.play();
 
         footerPlayBtn.innerHTML = '<i class="bi bi-pause-fill"></i>';
 
+        // Buscar y actualizar el botón de la tarjeta que corresponde
+        document.querySelectorAll('.play-button').forEach(button => {
+            const btnAudio = location.origin + button.getAttribute('data-audio');
+            if (btnAudio === audioUrl) {
+                button.innerHTML = '<i class="bi bi-pause-fill"></i>';
+                lastActiveButton = button;
+            } else {
+                button.innerHTML = '<i class="bi bi-play-fill"></i>';
+            }
+        });
+
+        // Tiempo y progreso
         audioElement.onloadedmetadata = () => {
             totalDurationSpan.textContent = formatTime(audioElement.duration);
             progressBar.max = audioElement.duration;
@@ -88,11 +159,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
         audioElement.onended = () => {
             footerPlayBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
-            if (lastActiveButton) {
-                lastActiveButton.innerHTML = '<i class="bi bi-play-fill"></i>';
-            }
+            playRandomTrack();
         };
     };
+
+
+    window.playPreviousTrack = function () {
+        if (audioHistory.length > 0) {
+            const prevIndex = audioHistory.pop();
+            const prevTrack = allTracks[prevIndex];
+            playTrack(prevTrack.audioUrl, prevTrack.title, prevTrack.artist, prevTrack.imgSrc);
+            currentTrackIndex = prevIndex;
+
+            if (audioHistory.length === 0 && prevBtn) {
+                prevBtn.disabled = true;
+            }
+        }
+    };
+
+    window.playRandomTrack = function () {
+        if (allTracks.length === 0) return;
+
+        if (shuffledIndices.length === 0) {
+            initShuffle();
+        }
+
+        let attempts = 0;
+        while (attempts < shuffledIndices.length) {
+            if (shuffledPos >= shuffledIndices.length) {
+                initShuffle();
+            }
+
+            const nextIndex = shuffledIndices[shuffledPos];
+            shuffledPos++;
+
+            if (nextIndex !== currentTrackIndex) {
+                const track = allTracks[nextIndex];
+                playTrack(track.audioUrl, track.title, track.artist, track.imgSrc);
+                return;
+            }
+            attempts++;
+        }
+
+        const track = allTracks[currentTrackIndex];
+        playTrack(track.audioUrl, track.title, track.artist, track.imgSrc);
+    };
+
 
     window.handlePlayClick = function (btn) {
         const audioUrl = btn.getAttribute('data-audio');
@@ -154,10 +266,18 @@ document.addEventListener('DOMContentLoaded', () => {
             window.handlePlayClick(this);
         });
     });
+
+    const volumeControl = document.getElementById('volume-control');
+    if (volumeControl) {
+        volumeControl.addEventListener('input', () => {
+            audioElement.volume = volumeControl.value;
+        });
+    }
 });
 
 
 
+// Playlist --> LEYTON
 
 window.handlePlayLink = function (a) {
     const audioUrl = a.getAttribute('data-audio');
@@ -184,7 +304,7 @@ window.addToLibrary = async function (trackId, btn) {
             // already exists
             if (btn) { btn.innerText = 'En tu biblioteca'; }
         } else if (!resp.ok) {
-            alert('No se pudo agregar.');
+            alert('Esta canción ya esta agregada.');
             if (btn) { btn.innerText = 'Agregar'; btn.disabled = false; }
         } else {
             if (btn) { btn.innerText = 'En tu biblioteca'; }

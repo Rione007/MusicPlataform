@@ -132,6 +132,10 @@ namespace MusicPlataform.Server.Controllers
             if (playlist == null)
                 return NotFound(new { Message = "Playlist no encontrada" });
 
+            bool alreadyExists = playlist.Tracks.Any(pt => pt.TrackId == dto.TrackId);
+            if (alreadyExists)
+                return BadRequest(new { Message = "El track ya está en la playlist" });
+
             var playlistTrack = new PlaylistTrack
             {
                 PlaylistId = playlistId,
@@ -143,8 +147,9 @@ namespace MusicPlataform.Server.Controllers
             _context.PlaylistTracks.Add(playlistTrack);
             _context.SaveChanges();
 
-            return Ok(new { Message = "Track agregado con éxito", playlistId, dto.TrackId, playlistTrack.Order });
+            return Ok(new { Message = "Cancion agregada con éxito", playlistId, dto.TrackId, playlistTrack.Order });
         }
+
 
         // ✅ DELETE: api/playlists/{playlistId}/tracks/{trackId}
         [HttpDelete("{playlistId:int}/tracks/{trackId:int}")]
