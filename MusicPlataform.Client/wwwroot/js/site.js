@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 //    `;
 //}
 
+// Reproductor de audio en el footer
 
 document.addEventListener('DOMContentLoaded', () => {
     const audioFooter = document.getElementById('audio-footer');
@@ -60,6 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressBar = document.getElementById('progress-bar');
     const currentTimeSpan = document.getElementById('current-time');
     const totalDurationSpan = document.getElementById('total-duration');
+
+    let lastActiveButton = null;
 
     window.playTrack = function (audioUrl, title, artist, imgSrc) {
         audioFooter.classList.remove('d-none');
@@ -85,6 +88,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         audioElement.onended = () => {
             footerPlayBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
+            if (lastActiveButton) {
+                lastActiveButton.innerHTML = '<i class="bi bi-play-fill"></i>';
+            }
         };
     };
 
@@ -94,16 +100,42 @@ document.addEventListener('DOMContentLoaded', () => {
         const artist = btn.getAttribute('data-artist');
         const imgSrc = '/img/default-imagen.webp';
 
-        playTrack(audioUrl, title, artist, imgSrc);
+        const fullAudioSrc = location.origin + audioUrl;
+
+        if (audioElement.src === fullAudioSrc) {
+            if (audioElement.paused) {
+                audioElement.play();
+                footerPlayBtn.innerHTML = '<i class="bi bi-pause-fill"></i>';
+                btn.innerHTML = '<i class="bi bi-pause-fill"></i>';
+            } else {
+                audioElement.pause();
+                footerPlayBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
+                btn.innerHTML = '<i class="bi bi-play-fill"></i>';
+            }
+        } else {
+            if (lastActiveButton) {
+                lastActiveButton.innerHTML = '<i class="bi bi-play-fill"></i>';
+            }
+
+            playTrack(audioUrl, title, artist, imgSrc);
+            btn.innerHTML = '<i class="bi bi-pause-fill"></i>';
+            lastActiveButton = btn;
+        }
     };
 
     window.togglePlay = function () {
         if (audioElement.paused) {
             audioElement.play();
             footerPlayBtn.innerHTML = '<i class="bi bi-pause-fill"></i>';
+            if (lastActiveButton) {
+                lastActiveButton.innerHTML = '<i class="bi bi-pause-fill"></i>';
+            }
         } else {
             audioElement.pause();
             footerPlayBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
+            if (lastActiveButton) {
+                lastActiveButton.innerHTML = '<i class="bi bi-play-fill"></i>';
+            }
         }
     };
 
