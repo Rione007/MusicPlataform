@@ -25,10 +25,11 @@
                                 data-audio="@track.AudioUrl"
                                 data-title="@track.Title"
                                 data-artist="@track.Artist"
-                                onclick="handlePlayClick(this)">
-                            <i class="bi bi-play-fill"></i>
-                        </button>
-                    }
+                onclick="handlePlayClick(this)">
+            <i class="bi bi-play-fill"></i>
+        </button>
+        <button class="btn btn-warning btn-sm ms-1" onclick="addToLibrary(@track.Id, this)">+PlayList</button>
+}
                     else
                     {
                         <a href="@Url.Action("Login", "Users", new { returnUrl = Url.Action("Index", "ArTrack") })"

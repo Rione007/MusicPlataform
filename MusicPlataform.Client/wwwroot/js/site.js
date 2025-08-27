@@ -125,3 +125,41 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+
+
+window.handlePlayLink = function (a) {
+    const audioUrl = a.getAttribute('data-audio');
+    const title = a.getAttribute('data-title');
+    const artist = a.getAttribute('data-artist') || '';
+    playTrack(audioUrl, title, artist, '/img/default-imagen.webp');
+};
+
+window.addToLibrary = async function (trackId, btn) {
+    try {
+        if (btn) { btn.disabled = true; btn.innerText = 'Añadiendo...'; }
+        // Anti-forgery token
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        const resp = await fetch('/Playlists/AddToLibrary?trackId=' + trackId, {
+            method: 'POST',
+
+            credentials: 'same-origin'
+        });
+        if (resp.status === 401) {
+            alert('Debes iniciar sesión.');
+            return;
+        }
+        if (resp.status === 409) {
+            // already exists
+            if (btn) { btn.innerText = 'En tu biblioteca'; }
+        } else if (!resp.ok) {
+            alert('No se pudo agregar.');
+            if (btn) { btn.innerText = 'Agregar'; btn.disabled = false; }
+        } else {
+            if (btn) { btn.innerText = 'En tu biblioteca'; }
+            if (window.refreshLibrary) window.refreshLibrary();
+        }
+    } catch (e) {
+        alert('Error de red.');
+        if (btn) { btn.innerText = 'Agregar'; btn.disabled = false; }
+    }
+};
