@@ -40,28 +40,6 @@ namespace MusicPlataform.Client.Controllers
             return list;
         }
 
-        // Helper: ensure the user's 'Mi Biblioteca' playlist exists
-        private async Task<PlaylistReadDtoClient> EnsureLibraryPlaylistAsync(HttpClient api, int userId)
-        {
-            var all = await GetAllPlaylistsAsync(api);
-            var library = all.FirstOrDefault(p => p.OwnerId == userId && p.Name == "Mi Biblioteca");
-            if (library != null) return library;
-
-            // Create it (private)
-            var payload = new
-            {
-                Name = "Mi Biblioteca",
-                OwnerId = userId,
-                IsPublic = false
-            };
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            var create = await api.PostAsync("playlists", content);
-            create.EnsureSuccessStatusCode();
-            var json = await create.Content.ReadAsStringAsync();
-            var created = JsonSerializer.Deserialize<PlaylistReadDtoClient>(json, _jsonOptions);
-            if (created == null) throw new InvalidOperationException("No se pudo crear la playlist 'Mi Biblioteca'.");
-            return created;
-        }
 
         // Helper: get all tracks and filter by ids
         private async Task<List<TrackClient>> GetTracksByIdsAsync(HttpClient api, IEnumerable<int> ids)
@@ -75,79 +53,7 @@ namespace MusicPlataform.Client.Controllers
             return all.Where(t => set.Contains(t.Id)).ToList();
         }
 
-        // GET: JSON for sidebar library
-        [HttpGet]
-        public async Task<IActionResult> MyLibraryJson()
-        {
-            var userId = GetUserId();
-            if (userId == null) return Unauthorized();
 
-            var api = _httpClientFactory.CreateClient("MusicApi");
-
-            // Ensure (but don't create) library exists; if not, return empty
-            var all = await GetAllPlaylistsAsync(api);
-            var library = all.FirstOrDefault(p => p.OwnerId == userId && p.Name == "Mi Biblioteca");
-            if (library == null) return Json(new { items = Array.Empty<object>() });
-
-            var tracks = await GetTracksByIdsAsync(api, library.TrackIds);
-            var items = tracks.Select(t => new { id = t.Id, title = t.Title, artist = t.Artist, audioUrl = t.AudioUrl });
-            return Json(new { items });
-        }
-
-        // POST: Add a track to 'Mi Biblioteca'
-        [HttpPost]
-        public async Task<IActionResult> AddToLibrary(int trackId)
-        {
-            var userId = GetUserId();
-            if (userId == null) return Unauthorized();
-
-            var api = _httpClientFactory.CreateClient("MusicApi");
-            var library = await EnsureLibraryPlaylistAsync(api, userId.Value);
-
-            // Avoid duplicates
-            if (library.TrackIds.Contains(trackId))
-            {
-                return Conflict(new { message = "La canción ya está en tu biblioteca." });
-            }
-
-            var dto = new PlaylistAddTrackDto { TrackId = trackId, Order = null };
-            var content = new StringContent(JsonSerializer.Serialize(dto), Encoding.UTF8, "application/json");
-            var resp = await api.PostAsync($"playlists/{library.Id}/tracks", content);
-            if (!resp.IsSuccessStatusCode)
-            {
-                var error = await resp.Content.ReadAsStringAsync();
-                return StatusCode((int)resp.StatusCode, new { message = "Error al agregar la canción.", detail = error });
-            }
-
-            return Ok(new { message = "Agregado a tu biblioteca.", playlistId = library.Id, trackId });
-        }
-
-        // DELETE: Remove a track from 'Mi Biblioteca'
-        [HttpPost]
-        public async Task<IActionResult> RemoveFromLibrary(int trackId)
-        {
-            var userId = GetUserId();
-            if (userId == null) return Unauthorized();
-
-            var api = _httpClientFactory.CreateClient("MusicApi");
-            var all = await GetAllPlaylistsAsync(api);
-            var library = all.FirstOrDefault(p => p.OwnerId == userId && p.Name == "Mi Biblioteca");
-            if (library == null) return NotFound(new { message = "No tienes biblioteca creada." });
-
-            var resp = await api.DeleteAsync($"playlists/{library.Id}/tracks/{trackId}");
-            if (!resp.IsSuccessStatusCode)
-            {
-                var error = await resp.Content.ReadAsStringAsync();
-                return StatusCode((int)resp.StatusCode, new { message = "Error al quitar la canción.", detail = error });
-            }
-
-            return Ok(new { message = "Quitado de tu biblioteca." });
-        }
-
-
-        // ====== NUEVO: Mis listas (además de "Mi Biblioteca") ======
-
-        // GET: JSON con las playlists del usuario (excluye "Mi Biblioteca")
         [HttpGet]
         public async Task<IActionResult> MyPlaylistsJson()
         {
@@ -157,13 +63,14 @@ namespace MusicPlataform.Client.Controllers
             var api = _httpClientFactory.CreateClient("MusicApi");
             var all = await GetAllPlaylistsAsync(api);
             var mine = all
-                .Where(p => p.OwnerId == userId && p.Name != "Mi Biblioteca")
+                .Where(p => p.OwnerId == userId)
                 .Select(p => new { id = p.Id, name = p.Name, isPublic = p.IsPublic })
                 .OrderBy(p => p.name)
                 .ToList();
 
             return Json(new { items = mine });
         }
+
 
         // POST: Crea una lista vacía con un nombre por defecto (Mi lista n.º X)
         [HttpPost]
