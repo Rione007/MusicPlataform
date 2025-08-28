@@ -286,32 +286,61 @@ window.handlePlayLink = function (a) {
     playTrack(audioUrl, title, artist, '/img/default-imagen.webp');
 };
 
-window.addToLibrary = async function (trackId, btn) {
-    try {
-        if (btn) { btn.disabled = true; btn.innerText = 'Añadiendo...'; }
-        // Anti-forgery token
-        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-        const resp = await fetch('/Playlists/AddToLibrary?trackId=' + trackId, {
-            method: 'POST',
 
-            credentials: 'same-origin'
+// Este abrirá un modal para seleccionar la playlist:
+
+window.openPlaylistSelector = async function (trackId) {
+    const response = await fetch('/Playlists/MyPlaylistsJson');
+    if (!response.ok) {
+        alert('No se pudo cargar tus playlists');
+        return;
+    }
+
+    const data = await response.json();
+    const playlists = data.items;
+
+    let html = '<div class="modal-body">';
+    html += '<p>Selecciona una playlist:</p>';
+    html += '<ul class="list-group">';
+    playlists.forEach(pl => {
+        html += `<li class="list-group-item list-group-item-action" onclick="addTrackToPlaylist(${pl.id}, ${trackId})">${pl.name} ${pl.isPublic ? '(pública)' : '(privada)'}</li>`;
+    });
+    html += '</ul>';
+    html += '</div>';
+
+    html += `<div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>`;
+
+    document.getElementById('playlistModalContent').innerHTML = html;
+    const modal = new bootstrap.Modal(document.getElementById('playlistModal'));
+    modal.show();
+};
+
+
+
+
+// Crear método para agregar el track a una playlist
+
+
+window.addTrackToPlaylist = async function (playlistId, trackId) {
+    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+    try {
+        const response = await fetch(`/Playlists/AddTrack?id=${playlistId}&trackId=${trackId}`, {
+            method: 'POST',
+            headers: {
+                'RequestVerificationToken': token
+            }
         });
-        if (resp.status === 401) {
-            alert('Debes iniciar sesión.');
-            return;
-        }
-        if (resp.status === 409) {
-            // already exists
-            if (btn) { btn.innerText = 'En tu biblioteca'; }
-        } else if (!resp.ok) {
-            alert('Esta canción ya esta agregada.');
-            if (btn) { btn.innerText = 'Agregar'; btn.disabled = false; }
+
+        if (response.ok) {
+            alert('Canción agregada a la lista.');
+            bootstrap.Modal.getInstance(document.getElementById('playlistModal')).hide();
         } else {
-            if (btn) { btn.innerText = 'En tu biblioteca'; }
-            if (window.refreshLibrary) window.refreshLibrary();
+            const error = await response.json();
+            alert(error.message || 'No se pudo agregar.');
         }
     } catch (e) {
         alert('Error de red.');
-        if (btn) { btn.innerText = 'Agregar'; btn.disabled = false; }
     }
 };

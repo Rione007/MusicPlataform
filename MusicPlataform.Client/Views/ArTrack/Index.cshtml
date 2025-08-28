@@ -95,7 +95,15 @@
                                     onclick="handlePlayClick(this)">
                                 <i class="bi bi-play-fill"></i>
                             </button>
-                            <button class="btn btn-warning btn-sm ms-1" onclick="addToLibrary(@track.Id, this)">+PlayList</button>
+                            <div class="dropdown d-inline ms-1">
+                                <button class="btn btn-warning btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    + Lista
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-dark playlist-dropdown" data-track-id="@track.Id">
+                                    <li><span class="dropdown-item text-muted">Cargando...</span></li>
+                                </ul>
+                            </div>
+
                         }
                         else
                         {
@@ -121,4 +129,6 @@
 
 @section Scripts {
     <script src="~/js/site.js"></script>
+    <script src="~/js/add-to-playlist.js"></script>
+
 }
