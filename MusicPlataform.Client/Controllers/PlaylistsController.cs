@@ -171,6 +171,9 @@ namespace MusicPlataform.Client.Controllers
             }
             return Ok(new { message = "Quitado", id, trackId });
         }
+
+
+
         // Optional: simple Index view that shows library page (not required for sidebar)
         [HttpGet]
         public IActionResult Index()

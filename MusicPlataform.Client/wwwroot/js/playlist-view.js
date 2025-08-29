@@ -13,7 +13,7 @@
                 <li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
                     <div>
                         <div class="fw-semibold">${it.title}</div>
-                        <small class="text-muted">${it.artist ?? ''}</small>
+                        <small class="text-white">${it.artist ?? ''}</small>
                     </div>
                     <div>
                         <button class="btn btn-sm btn-outline-light me-2"

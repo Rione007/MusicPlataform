@@ -1,4 +1,6 @@
-﻿namespace MusicPlataform.Server.DTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MusicPlataform.Server.DTOs
 {
     public class PlaylistDtos
     {
