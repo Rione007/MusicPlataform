@@ -14,8 +14,9 @@
                 listEl.innerHTML = '<li class="nav-item text-muted"><span class="nav-link">Sin listas</span></li>';
             } else {
                 listEl.innerHTML = items.map(p =>
-                    `<li class="nav-item"><a class="nav-link" href="/Playlists/Details/${p.id}">${p.name}</a></li>`
+                    `<li class="nav-item"><a class="nav-link" href="/Playlists/Details/${p.id}" data-playlist-id="${p.id}">${p.name}</a></li>`
                 ).join('');
+
             }
         } catch {
             listEl.innerHTML = '<li class="nav-item text-danger"><span class="nav-link">Error</span></li>';

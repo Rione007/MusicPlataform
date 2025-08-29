@@ -2,16 +2,21 @@
 @{
     ViewData["Title"] = Model.Name;
 }
-
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
-        <h2 class="text-white mb-0">@Model.Name</h2>
-        <small class="text-muted">Playlist privada • @Model.TrackIds.Count() canciones</small>
+        <input id="playlist-name" class="form-control form-control-lg bg-dark text-white border-0" value="@Model.Name" />
+        <small class="text-muted">Playlist privada • <span id="track-count">@Model.TrackIds.Count()</span> canciones</small>
     </div>
-    <a href="@Url.Action("Index", "ArTrack")" class="btn btn-outline-light btn-sm">
-        <i class="bi bi-arrow-left"></i> Volver
-    </a>
+    <div>
+        <button id="btn-save-name" class="btn btn-outline-light btn-sm me-2">
+            <i class="bi bi-save"></i> Guardar
+        </button>
+        <a href="@Url.Action("Index", "ArTrack")" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
 </div>
+
 
 <div class="row">
     <div class="col-12">
@@ -29,6 +34,28 @@
 @section Scripts {
     <script>
         const playlistId = @Model.Id;
+
+        document.getElementById('btn-save-name')?.addEventListener('click', async () => {
+            const newName = document.getElementById('playlist-name').value;
+            const resp = await fetch(`/Playlists/UpdateName/${playlistId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newName })
+            });
+                  if (resp.ok) {
+            alert('Nombre actualizado');
+            document.title = newName;
+
+            // Actualizar el nombre en la barra lateral
+            const link = document.querySelector(`#playlists-list a[data-playlist-id="${playlistId}"]`);
+            if (link) {
+                link.textContent = newName;
+            }
+        }
+         else {
+                alert('No se pudo actualizar el nombre');
+            }
+        });
     </script>
     <script src="~/js/playlist-view.js"></script>
 }
