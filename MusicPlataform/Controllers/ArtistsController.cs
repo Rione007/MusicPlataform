@@ -26,7 +26,12 @@ namespace MusicPlataform.Server.Controllers
                 .Select(a => new ArtistReadDto(a.Id, a.Name, a.Bio,a.ImageUrl))
                 .ToList();
 
-            return Ok(artists);
+            if (artists.Any())
+            {
+                return Ok(artists);
+            }
+
+            return NotFound();
         }
 
         // GET: api/artists/5

@@ -13,9 +13,9 @@ namespace MusicPlataform.Client.Controllers
 
         public ArTrackController(IHttpClientFactory httpClientFactory)
         {
-            httpClient = httpClientFactory.CreateClient();
-            httpClient.BaseAddress = new Uri("https://localhost:7106/api");
+            httpClient = httpClientFactory.CreateClient("MusicApi");
         }
+
 
         public async Task<IActionResult> MostrarTracks()
         {
@@ -24,7 +24,7 @@ namespace MusicPlataform.Client.Controllers
                 PropertyNameCaseInsensitive = true
             }
             ;
-            var response = await httpClient.GetAsync("api/tracks");
+            var response = await httpClient.GetAsync("tracks");
 
             if (!response.IsSuccessStatusCode)
             {
@@ -49,7 +49,7 @@ namespace MusicPlataform.Client.Controllers
                 PropertyNameCaseInsensitive = true
             }
             ;
-            var response = await httpClient.GetAsync("api/artists");
+            var response = await httpClient.GetAsync("artists");
 
             if (!response.IsSuccessStatusCode)
             {
@@ -76,7 +76,7 @@ namespace MusicPlataform.Client.Controllers
                 PropertyNameCaseInsensitive = true
             };
 
-            var artistResponse = await httpClient.GetAsync("api/artists");
+            var artistResponse = await httpClient.GetAsync("artists");
             if (artistResponse.IsSuccessStatusCode)
             {
                 var artistContent = await artistResponse.Content.ReadAsStringAsync();
@@ -88,7 +88,7 @@ namespace MusicPlataform.Client.Controllers
                 viewModel.Artistas = new List<ArtistClient>();
             }
 
-            var trackResponse = await httpClient.GetAsync("api/tracks");
+            var trackResponse = await httpClient.GetAsync("tracks");
             if (trackResponse.IsSuccessStatusCode)
             {
                 var trackContent = await trackResponse.Content.ReadAsStringAsync();
@@ -110,7 +110,7 @@ namespace MusicPlataform.Client.Controllers
                 PropertyNameCaseInsensitive = true
             };
 
-            var artistResponse = await httpClient.GetAsync($"api/artists/{id}");
+            var artistResponse = await httpClient.GetAsync($"artists/{id}");
             if (!artistResponse.IsSuccessStatusCode)
             {
                 return NotFound();
@@ -119,7 +119,7 @@ namespace MusicPlataform.Client.Controllers
             var artistContent = await artistResponse.Content.ReadAsStringAsync();
             var artista = JsonSerializer.Deserialize<ArtistClient>(artistContent, options);
 
-            var trackResponse = await httpClient.GetAsync("api/tracks");
+            var trackResponse = await httpClient.GetAsync("tracks");
             var tracks = new List<TrackClient>();
 
             if (trackResponse.IsSuccessStatusCode)

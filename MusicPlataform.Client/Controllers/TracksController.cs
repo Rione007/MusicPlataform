@@ -11,8 +11,7 @@ namespace MusicPlataform.Client.Controllers
 
         public TracksController(IHttpClientFactory httpClientFactory)
         {
-            httpClient = httpClientFactory.CreateClient();
-            httpClient.BaseAddress = new Uri("https://localhost:7106/api");
+            httpClient = httpClientFactory.CreateClient("MusicApi");
         }
 
         public async Task<IActionResult> Index()

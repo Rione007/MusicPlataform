@@ -11,6 +11,7 @@ namespace MusicPlataform.Client.Controllers
     [Authorize]
     public class PlaylistsController : Controller
     {
+        private readonly HttpClient httpClient;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
         {
@@ -20,6 +21,7 @@ namespace MusicPlataform.Client.Controllers
         public PlaylistsController(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
+            httpClient = httpClientFactory.CreateClient("MusicApi");
         }
 
         private int? GetUserId()
