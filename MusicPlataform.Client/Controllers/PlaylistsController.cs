@@ -22,7 +22,6 @@ namespace MusicPlataform.Client.Controllers
             _httpClientFactory = httpClientFactory;
         }
 
-        // Helper: get user id from claims
         private int? GetUserId()
         {
             var idStr = User.FindFirst("UserId")?.Value;
@@ -30,7 +29,6 @@ namespace MusicPlataform.Client.Controllers
             return null;
         }
 
-        // Helper: get all playlists from API
         private async Task<List<PlaylistReadDtoClient>> GetAllPlaylistsAsync(HttpClient api)
         {
             var resp = await api.GetAsync("playlists");
@@ -40,8 +38,6 @@ namespace MusicPlataform.Client.Controllers
             return list;
         }
 
-
-        // Helper: get all tracks and filter by ids
         private async Task<List<TrackClient>> GetTracksByIdsAsync(HttpClient api, IEnumerable<int> ids)
         {
             var set = new HashSet<int>(ids);
@@ -52,7 +48,6 @@ namespace MusicPlataform.Client.Controllers
             var all = JsonSerializer.Deserialize<List<TrackClient>>(json, _jsonOptions) ?? new();
             return all.Where(t => set.Contains(t.Id)).ToList();
         }
-
 
         [HttpGet]
         public async Task<IActionResult> MyPlaylistsJson()
@@ -71,8 +66,6 @@ namespace MusicPlataform.Client.Controllers
             return Json(new { items = mine });
         }
 
-
-        // POST: Crea una lista vacía con un nombre por defecto (Mi lista n.º X)
         [HttpPost]
         public async Task<IActionResult> CreateDefault()
         {
@@ -83,16 +76,14 @@ namespace MusicPlataform.Client.Controllers
             var all = await GetAllPlaylistsAsync(api);
             var mine = all.Where(p => p.OwnerId == userId).Select(p => p.Name).ToList();
 
-            // Buscar el siguiente número disponible
             int n = 1;
             string name;
             do
             {
-                name = $"Mi lista n.º {n}";
+                name = $"Play List n.º {n}";
                 n++;
             } while (mine.Contains(name, StringComparer.OrdinalIgnoreCase));
 
-            // Crear (privada por defecto)
             var payload = new { Name = name, OwnerId = userId.Value, IsPublic = false };
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
             var resp = await api.PostAsync("playlists", content);
@@ -106,11 +97,9 @@ namespace MusicPlataform.Client.Controllers
             var created = JsonSerializer.Deserialize<PlaylistReadDtoClient>(json, _jsonOptions);
             if (created == null) return Problem("Respuesta inválida del servidor.");
 
-            // Devolver datos y URL para redirigir
             return Json(new { id = created.Id, name = created.Name, url = Url.Action("Details", new { id = created.Id }) });
         }
 
-        // GET: Vista de una playlist
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
@@ -125,7 +114,6 @@ namespace MusicPlataform.Client.Controllers
             return View(playlist);
         }
 
-        // GET: JSON con los tracks de una playlist
         [HttpGet]
         public async Task<IActionResult> PlaylistJson(int id)
         {
@@ -142,7 +130,6 @@ namespace MusicPlataform.Client.Controllers
             return Json(new { items });
         }
 
-        // POST: Agregar track a una playlist
         [HttpPost]
         public async Task<IActionResult> AddTrack(int id, int trackId)
         {
@@ -158,7 +145,6 @@ namespace MusicPlataform.Client.Controllers
             return Ok(new { message = "Agregado", id, trackId });
         }
 
-        // POST: Quitar track de una playlist
         [HttpPost]
         public async Task<IActionResult> RemoveTrack(int id, int trackId)
         {
@@ -171,11 +157,55 @@ namespace MusicPlataform.Client.Controllers
             }
             return Ok(new { message = "Quitado", id, trackId });
         }
-        // Optional: simple Index view that shows library page (not required for sidebar)
+
         [HttpGet]
         public IActionResult Index()
         {
-            return View(); // You can create a Razor view if needed
+            return View();
+        }
+
+        public class PlaylistUpdateNameDto
+        {
+            public string Name { get; set; } = string.Empty;
+        }
+
+        // ✅ Método corregido: actualiza el nombre usando PUT /api/playlists/{id}
+        [HttpPost]
+        public async Task<IActionResult> UpdateName(int id, [FromBody] PlaylistUpdateNameDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name))
+                return BadRequest(new { message = "Nombre inválido." });
+
+            var api = _httpClientFactory.CreateClient("MusicApi");
+
+            // Obtener la playlist actual
+            var respGet = await api.GetAsync($"playlists/{id}");
+            if (!respGet.IsSuccessStatusCode)
+                return NotFound(new { message = "Playlist no encontrada." });
+
+            var json = await respGet.Content.ReadAsStringAsync();
+            var current = JsonSerializer.Deserialize<PlaylistReadDtoClient>(json, _jsonOptions);
+            if (current == null)
+                return Problem("No se pudo leer la playlist actual.");
+
+            // Crear el payload completo requerido por PlaylistCreateDto
+            var updateDto = new
+            {
+                Name = dto.Name,
+                OwnerId = current.OwnerId,
+                IsPublic = current.IsPublic
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(updateDto), Encoding.UTF8, "application/json");
+            var resp = await api.PutAsync($"playlists/{id}", content);
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                var error = await resp.Content.ReadAsStringAsync();
+                return StatusCode((int)resp.StatusCode, new { message = "No se pudo actualizar el nombre", detail = error });
+            }
+
+            return Ok(new { message = "Nombre actualizado" });
         }
     }
 }
