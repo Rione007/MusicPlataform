@@ -19,7 +19,7 @@
 
             }
         } catch {
-            listEl.innerHTML = '<li class="nav-item text-danger"><span class="nav-link">Error</span></li>';
+            listEl.innerHTML = '<li class="nav-item text-danger"><span class="nav-link">Sesion no iniciada</span></li>';
         }
     }
 
